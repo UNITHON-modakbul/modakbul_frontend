@@ -1,6 +1,5 @@
-import { Braces, Check, ShieldCheck, UsersRound, Workflow } from 'lucide-react'
-import { useOutletContext } from 'react-router'
-import type { WorkspaceContext } from '../../../routes/workspaceContext.ts'
+import { Braces, Check, FolderKanban, ShieldCheck, Workflow } from 'lucide-react'
+import { Link } from 'react-router'
 import { ProjectPdfUpload } from '../components/ProjectPdfUpload.tsx'
 
 const pipelineSteps = [
@@ -11,26 +10,28 @@ const pipelineSteps = [
 ]
 
 export function ProjectStartPage() {
-  const { teamName } = useOutletContext<WorkspaceContext>()
   return (
     <div className="demo-grid relative min-h-screen overflow-hidden bg-[#f3f0e7] text-[#17332f]">
       <div className="pointer-events-none absolute -left-24 top-28 h-64 w-64 rounded-full bg-[#d9ef7d]/45 blur-3xl" />
       <div className="pointer-events-none absolute -right-24 bottom-4 h-80 w-80 rounded-full bg-[#ff9b75]/35 blur-3xl" />
 
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-10">
-        <a className="flex items-center gap-3" href="/" aria-label="DemoForge 홈">
+        <Link className="flex items-center gap-3" to="/" aria-label="DemoForge 프로젝트 홈">
           <span className="grid size-10 place-items-center rounded-xl bg-[#17332f] text-[#fffaf1] shadow-[4px_4px_0_#ec6b42]">
             <Braces aria-hidden="true" size={21} strokeWidth={2.4} />
           </span>
           <span className="text-lg font-black tracking-[-0.04em]">
             DemoForge
           </span>
-        </a>
+        </Link>
 
-        <div className="flex items-center gap-2 rounded-full border border-[#17332f]/12 bg-white/55 px-3 py-2 text-[11px] font-bold text-[#17332f]/65 backdrop-blur">
-          <UsersRound aria-hidden="true" size={14} />
-          <span className="max-w-28 truncate sm:max-w-52">{teamName}</span>
-        </div>
+        <Link
+          className="flex items-center gap-2 rounded-full border border-[#17332f]/12 bg-white/55 px-3 py-2 text-[11px] font-bold text-[#17332f]/65 backdrop-blur transition hover:bg-white"
+          to="/"
+        >
+          <FolderKanban aria-hidden="true" size={14} />
+          프로젝트
+        </Link>
       </header>
 
       <main className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-5 pb-14 pt-8 sm:px-8 sm:pt-14 lg:min-h-[calc(100vh-160px)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-20 lg:px-10 lg:pb-20 lg:pt-8">
