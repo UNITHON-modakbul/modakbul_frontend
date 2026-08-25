@@ -85,7 +85,7 @@ export function ProjectStartPage() {
           </div>
         </section>
 
-        <section className="relative mx-auto w-full max-w-xl lg:mx-0">
+        <section className="relative mx-auto w-full min-w-0 max-w-xl lg:mx-0">
           <div className="gentle-float absolute -right-3 -top-8 z-20 hidden rounded-xl bg-[#ec6b42] px-4 py-3 text-xs font-black text-white shadow-[5px_5px_0_#17332f] sm:block">
             ONE INPUT,
             <br />

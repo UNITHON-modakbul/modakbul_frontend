@@ -62,7 +62,7 @@ export function ProjectPdfUpload() {
   }
 
   return (
-    <section className="relative rounded-[28px] border border-[#17332f]/15 bg-white/85 p-5 shadow-[0_28px_80px_rgba(23,51,47,0.14)] backdrop-blur sm:p-7">
+    <section className="relative w-full min-w-0 max-w-full overflow-hidden rounded-[28px] border border-[#17332f]/15 bg-white/85 p-5 shadow-[0_28px_80px_rgba(23,51,47,0.14)] backdrop-blur sm:p-7">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#e9f2cc] px-3 py-1.5 text-xs font-bold text-[#375226]">
@@ -83,7 +83,7 @@ export function ProjectPdfUpload() {
 
       <div
         className={cn(
-          'rounded-2xl border-2 border-dashed p-3 transition',
+          'w-full min-w-0 max-w-full rounded-2xl border-2 border-dashed p-3 transition',
           isDragging
             ? 'border-[#ec6b42] bg-[#fff3eb]'
             : 'border-[#17332f]/15 bg-[#fffdf7]',
@@ -103,12 +103,15 @@ export function ProjectPdfUpload() {
         />
 
         {file ? (
-          <div className="flex min-h-44 items-center gap-4 rounded-xl bg-[#f3f0e7] p-5">
+          <div className="flex min-h-44 w-full min-w-0 max-w-full items-center gap-4 overflow-hidden rounded-xl bg-[#f3f0e7] p-5">
             <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#ec6b42] text-white shadow-[3px_3px_0_#17332f]">
               <FileText aria-hidden="true" size={22} />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-extrabold text-[#17332f]">
+              <p
+                className="block max-w-full truncate text-sm font-extrabold text-[#17332f]"
+                title={file.name}
+              >
                 {file.name}
               </p>
               <p className="mt-1 font-mono text-xs text-[#17332f]/45">
