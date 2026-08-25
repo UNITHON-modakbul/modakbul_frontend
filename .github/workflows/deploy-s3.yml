@@ -48,6 +48,7 @@ jobs:
         run: |
           test -n "$AWS_REGION" || (echo "AWS_REGION environment variable is required" && exit 1)
           test -n "${{ secrets.AWS_ROLE_ARN }}" || (echo "AWS_ROLE_ARN environment variable is required" && exit 1)
+          test -n "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" || (echo "CLOUDFRONT_DISTRIBUTION_ID environment variable is required" && exit 1)
 
       - name: Debug OIDC subject
         shell: bash
@@ -82,25 +83,32 @@ jobs:
           aws s3 sync dist/ "s3://$AWS_S3_BUCKET" \
             --delete \
             --only-show-errors \
-            --cache-control "no-cache,no-store,must-revalidate"
+            --cache-control "no-store,no-cache,max-age=0,must-revalidate"
 
           aws s3 cp dist/index.html "s3://$AWS_S3_BUCKET/index.html" \
             --only-show-errors \
             --content-type "text/html; charset=utf-8" \
-            --cache-control "no-cache,no-store,must-revalidate"
+            --cache-control "no-store,no-cache,max-age=0,must-revalidate"
 
           if test -f dist/service-preview.html; then
             aws s3 cp dist/service-preview.html "s3://$AWS_S3_BUCKET/service-preview.html" \
               --only-show-errors \
               --content-type "text/html; charset=utf-8" \
-              --cache-control "no-cache,no-store,must-revalidate"
+              --cache-control "no-store,no-cache,max-age=0,must-revalidate"
           fi
+
+      - name: Invalidate CloudFront cache
+        run: >-
+          aws cloudfront create-invalidation
+          --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
+          --paths "/*"
 
       - name: Write deployment summary
         shell: bash
         run: |
           echo "## S3 deployment complete" >> "$GITHUB_STEP_SUMMARY"
           echo "- Bucket: \`s3://$AWS_S3_BUCKET\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- CloudFront cache invalidation requested" >> "$GITHUB_STEP_SUMMARY"
           if test -n "${{ vars.SITE_URL }}"; then
             echo "- Site: ${{ vars.SITE_URL }}" >> "$GITHUB_STEP_SUMMARY"
           fi
