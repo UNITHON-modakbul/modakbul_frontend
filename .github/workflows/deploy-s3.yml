@@ -49,6 +49,26 @@ jobs:
           test -n "$AWS_REGION" || (echo "AWS_REGION environment variable is required" && exit 1)
           test -n "${{ secrets.AWS_ROLE_ARN }}" || (echo "AWS_ROLE_ARN environment variable is required" && exit 1)
 
+      - name: Debug OIDC subject
+        shell: bash
+        run: |
+          TOKEN_JSON=$(curl -sLS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com")
+
+          TOKEN=$(echo "$TOKEN_JSON" | jq -r '.value')
+
+          PAYLOAD=$(echo "$TOKEN" | cut -d '.' -f2)
+          PAYLOAD="${PAYLOAD//-/+}"
+          PAYLOAD="${PAYLOAD//_/\/}"
+
+          case $((${#PAYLOAD} % 4)) in
+            2) PAYLOAD="${PAYLOAD}==" ;;
+            3) PAYLOAD="${PAYLOAD}=" ;;
+          esac
+
+          echo "$PAYLOAD" | base64 -d | jq '{sub, aud}'
+
       - name: Configure AWS credentials with OIDC
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v6.2.3
         with:
