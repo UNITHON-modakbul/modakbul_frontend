@@ -1,12 +1,12 @@
 import {
   ArrowUpRight,
-  CheckCircle2,
   Download,
   FileText,
   UploadCloud,
   X,
 } from 'lucide-react'
 import { useRef, useState, type DragEvent } from 'react'
+import { useNavigate } from 'react-router'
 import { Button } from '../../../components/ui/Button.tsx'
 import { cn } from '../../../utils/cn.ts'
 
@@ -32,18 +32,17 @@ function getPdfError(file: File) {
 }
 
 export function ProjectPdfUpload() {
+  const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
-  const [isReady, setIsReady] = useState(false)
 
   const selectFile = (selectedFile?: File) => {
     if (!selectedFile) return
 
     const validationError = getPdfError(selectedFile)
     setError(validationError)
-    setIsReady(false)
 
     if (!validationError) {
       setFile(selectedFile)
@@ -59,7 +58,6 @@ export function ProjectPdfUpload() {
   const clearFile = () => {
     setFile(null)
     setError(null)
-    setIsReady(false)
     if (inputRef.current) inputRef.current.value = ''
   }
 
@@ -152,9 +150,7 @@ export function ProjectPdfUpload() {
         role="status"
       >
         {error ??
-          (isReady
-            ? 'PDF 분석 요청을 보낼 준비가 됐어요.'
-            : '선택한 파일은 아직 서버로 전송되지 않습니다.')}
+          '선택한 파일은 아직 서버로 전송되지 않습니다.'}
       </p>
 
       <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-[#b6cf5b] bg-[#e9f2cc] p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -189,21 +185,12 @@ export function ProjectPdfUpload() {
       <Button
         className="mt-4 w-full"
         disabled={!file}
-        onClick={() => setIsReady(true)}
+        onClick={() => navigate('/requirements/review')}
         size="lg"
         type="button"
       >
-        {isReady ? (
-          <>
-            <CheckCircle2 aria-hidden="true" size={19} />
-            분석 준비 완료
-          </>
-        ) : (
-          <>
-            PDF 분석 시작하기
-            <ArrowUpRight aria-hidden="true" size={19} />
-          </>
-        )}
+        PDF 분석 시작하기
+        <ArrowUpRight aria-hidden="true" size={19} />
       </Button>
     </section>
   )

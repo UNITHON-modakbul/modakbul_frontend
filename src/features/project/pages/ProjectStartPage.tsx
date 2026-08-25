@@ -1,4 +1,6 @@
 import { Braces, Check, ShieldCheck, UsersRound, Workflow } from 'lucide-react'
+import { useOutletContext } from 'react-router'
+import type { WorkspaceContext } from '../../../routes/workspaceContext.ts'
 import { ProjectPdfUpload } from '../components/ProjectPdfUpload.tsx'
 
 const pipelineSteps = [
@@ -8,11 +10,8 @@ const pipelineSteps = [
   { label: 'Deploy', number: '04' },
 ]
 
-interface ProjectStartPageProps {
-  teamName: string
-}
-
-export function ProjectStartPage({ teamName }: ProjectStartPageProps) {
+export function ProjectStartPage() {
+  const { teamName } = useOutletContext<WorkspaceContext>()
   return (
     <div className="demo-grid relative min-h-screen overflow-hidden bg-[#f3f0e7] text-[#17332f]">
       <div className="pointer-events-none absolute -left-24 top-28 h-64 w-64 rounded-full bg-[#d9ef7d]/45 blur-3xl" />

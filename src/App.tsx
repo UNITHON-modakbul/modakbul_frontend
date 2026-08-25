@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { ProjectStartPage } from './features/project/pages/ProjectStartPage.tsx'
+import { Outlet } from 'react-router'
 import { TeamNameGate } from './features/team/components/TeamNameGate.tsx'
+import type { WorkspaceContext } from './routes/workspaceContext.ts'
 
 function App() {
   const [teamName, setTeamName] = useState<string | null>(null)
@@ -9,7 +10,7 @@ function App() {
     return <TeamNameGate onContinue={setTeamName} />
   }
 
-  return <ProjectStartPage teamName={teamName} />
+  return <Outlet context={{ teamName } satisfies WorkspaceContext} />
 }
 
 export default App
