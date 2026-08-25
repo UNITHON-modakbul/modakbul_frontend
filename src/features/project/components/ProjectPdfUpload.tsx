@@ -2,6 +2,7 @@ import {
   ArrowUpRight,
   Download,
   FileText,
+  LoaderCircle,
   UploadCloud,
   X,
 } from 'lucide-react'
@@ -9,6 +10,10 @@ import { useRef, useState, type DragEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../../../components/ui/Button.tsx'
 import { cn } from '../../../utils/cn.ts'
+import {
+  getPdfAnalysisErrorMessage,
+  useAnalyzePdf,
+} from '../hooks/useAnalyzePdf.ts'
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024
 
@@ -33,7 +38,9 @@ function getPdfError(file: File) {
 
 export function ProjectPdfUpload() {
   const navigate = useNavigate()
+  const analyzePdf = useAnalyzePdf()
   const inputRef = useRef<HTMLInputElement>(null)
+  const [projectName, setProjectName] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -41,6 +48,7 @@ export function ProjectPdfUpload() {
   const selectFile = (selectedFile?: File) => {
     if (!selectedFile) return
 
+    analyzePdf.reset()
     const validationError = getPdfError(selectedFile)
     setError(validationError)
 
@@ -56,9 +64,19 @@ export function ProjectPdfUpload() {
   }
 
   const clearFile = () => {
+    analyzePdf.reset()
     setFile(null)
     setError(null)
     if (inputRef.current) inputRef.current.value = ''
+  }
+
+  const handleAnalyze = () => {
+    const name = projectName.trim()
+    if (!file || !name) return
+
+    analyzePdf.mutate({ file, name }, {
+      onSuccess: () => navigate('/requirements/review'),
+    })
   }
 
   return (
@@ -79,6 +97,29 @@ export function ProjectPdfUpload() {
         <span className="hidden rounded-lg border border-[#17332f]/10 bg-[#f3f0e7] px-2.5 py-1 font-mono text-[11px] font-bold text-[#17332f]/50 sm:block">
           INPUT 01
         </span>
+      </div>
+
+      <div className="mb-4">
+        <label
+          className="mb-2 block text-sm font-extrabold text-[#17332f]"
+          htmlFor="project-name"
+        >
+          프로젝트 제목
+        </label>
+        <input
+          autoComplete="off"
+          className="h-12 w-full rounded-2xl border border-[#17332f]/15 bg-[#fffdf7] px-4 text-sm font-bold text-[#17332f] outline-none transition placeholder:font-medium placeholder:text-[#17332f]/30 focus:border-[#ec6b42] focus:ring-4 focus:ring-[#ec6b42]/10 disabled:cursor-wait disabled:opacity-60"
+          disabled={analyzePdf.isPending}
+          id="project-name"
+          maxLength={100}
+          onChange={(event) => {
+            analyzePdf.reset()
+            setProjectName(event.target.value)
+          }}
+          placeholder="예) 동네 클래스 예약 서비스"
+          type="text"
+          value={projectName}
+        />
       </div>
 
       <div
@@ -161,7 +202,11 @@ export function ProjectPdfUpload() {
         role="status"
       >
         {error ??
-          '선택한 파일은 아직 서버로 전송되지 않습니다.'}
+          (analyzePdf.isError
+            ? getPdfAnalysisErrorMessage(analyzePdf.error)
+            : analyzePdf.isPending
+              ? 'PDF 분석과 프로젝트 생성을 순서대로 진행하고 있어요.'
+              : '선택한 파일은 아직 서버로 전송되지 않습니다.')}
       </p>
 
       <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-[#b6cf5b] bg-[#e9f2cc] p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -195,13 +240,22 @@ export function ProjectPdfUpload() {
 
       <Button
         className="mt-4 w-full"
-        disabled={!file}
-        onClick={() => navigate('/requirements/review')}
+        disabled={!file || !projectName.trim() || analyzePdf.isPending}
+        onClick={handleAnalyze}
         size="lg"
         type="button"
       >
-        PDF 분석 시작하기
-        <ArrowUpRight aria-hidden="true" size={19} />
+        {analyzePdf.isPending ? (
+          <>
+            <LoaderCircle aria-hidden="true" className="animate-spin" size={19} />
+            PDF 분석 및 프로젝트 생성 중
+          </>
+        ) : (
+          <>
+            PDF 분석 시작하기
+            <ArrowUpRight aria-hidden="true" size={19} />
+          </>
+        )}
       </Button>
     </section>
   )
