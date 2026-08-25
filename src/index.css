@@ -35,13 +35,6 @@ textarea {
   background-size: 32px 32px;
 }
 
-.demo-grid-dark {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
 @keyframes gentle-float {
   0%,
   100% {

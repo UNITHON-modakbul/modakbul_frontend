@@ -5,11 +5,13 @@ import {
   Braces,
   Check,
   CheckCircle2,
+  CloudUpload,
   FileText,
   GitBranch,
   LayoutDashboard,
   LoaderCircle,
   PackageCheck,
+  PencilLine,
   Play,
   Rocket,
   Send,
@@ -17,10 +19,10 @@ import {
   Terminal,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { Button } from '../../../components/ui/Button.tsx'
 import { cn } from '../../../utils/cn.ts'
-import { InteractiveServiceEditor } from '../components/InteractiveServiceEditor.tsx'
+import { servicePreviewUrl } from '../../project/utils/preview.ts'
 import { QuestionCard } from '../components/QuestionCard.tsx'
 import {
   mockFollowUpQuestions,
@@ -51,8 +53,6 @@ const followUpAnalysisSteps = [
 ]
 
 const developmentSessionId = '01a038ee-5f82-79e0-96a9-1ce584341e5e'
-const localServiceUrl = 'http://localhost:3000'
-
 const developmentSteps = [
   '확정된 답변으로 ProjectSpec을 생성하고 있어요.',
   '개발 세션과 서비스 저장소를 연결하고 있어요.',
@@ -380,13 +380,17 @@ function DevelopmentLoading({ activeStep }: DevelopmentLoadingProps) {
 interface DevelopmentReadyProps {
   isLaunching: boolean
   isRunning: boolean
+  onDeploy: () => void
   onLaunch: () => void
+  onRevision: () => void
 }
 
 function DevelopmentReady({
   isLaunching,
   isRunning,
+  onDeploy,
   onLaunch,
+  onRevision,
 }: DevelopmentReadyProps) {
   return (
     <section className="grid min-h-0 flex-1 place-items-center py-4">
@@ -449,15 +453,53 @@ function DevelopmentReady({
           </div>
 
           {isRunning ? (
-            <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-2xl">
-              <InteractiveServiceEditor sessionId={developmentSessionId} />
-            </div>
+            <>
+              <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-2xl bg-white">
+                <iframe
+                  className="h-full min-h-0 w-full border-0 bg-white"
+                  src={servicePreviewUrl}
+                  title="AI가 개발한 로컬 서비스 미리보기"
+                />
+              </div>
+
+              <div className="mt-3 flex shrink-0 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 sm:flex-row sm:items-center">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-black text-white">
+                    미리보기를 확인하셨나요?
+                  </p>
+                  <p
+                    className="mt-0.5 truncate text-[11px] text-white/45"
+                  >
+                    수정을 요청하거나 현재 결과를 배포할 수 있어요.
+                  </p>
+                </div>
+                <div className="grid shrink-0 grid-cols-2 gap-2">
+                  <Button
+                    className="h-10 border-white/18 bg-white/10 px-4 text-xs text-white hover:border-white/35 hover:bg-white/15"
+                    onClick={onRevision}
+                    type="button"
+                    variant="outline"
+                  >
+                    <PencilLine aria-hidden="true" size={15} />
+                    수정 요청
+                  </Button>
+                  <Button
+                    className="h-10 bg-[#d9ef7d] px-4 text-xs text-[#17332f] shadow-[0_5px_0_#91ad34] hover:bg-[#e3f696] hover:shadow-[0_7px_0_#91ad34]"
+                    onClick={onDeploy}
+                    type="button"
+                  >
+                    <CloudUpload aria-hidden="true" size={15} />
+                    배포하기
+                  </Button>
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <div className="flex flex-1 flex-col justify-center py-5">
                 <p className="font-mono text-[10px] font-bold text-white/35">LOCAL URL</p>
                 <p className="mt-1 truncate font-mono text-sm font-bold text-[#d9ef7d]">
-                  {localServiceUrl}
+                  {servicePreviewUrl}
                 </p>
                 <p className="mt-4 font-mono text-[10px] font-bold text-white/35">
                   DEVELOPMENT SESSION
@@ -494,6 +536,9 @@ function DevelopmentReady({
 }
 
 export function RequirementsReviewPage() {
+  const navigate = useNavigate()
+  const { projectId } = useParams()
+  const resolvedProjectId = projectId ?? developmentSessionId
   const [questionRounds, setQuestionRounds] = useState<RequirementQuestion[][]>([
     mockRequirementQuestions,
   ])
@@ -709,7 +754,15 @@ export function RequirementsReviewPage() {
             <DevelopmentReady
               isLaunching={isLaunching}
               isRunning={isLocalRunning}
+              onDeploy={() =>
+                navigate(`/projects/${resolvedProjectId}/preview`, {
+                  state: { startDeployment: true },
+                })
+              }
               onLaunch={() => setIsLaunching(true)}
+              onRevision={() =>
+                navigate(`/projects/${resolvedProjectId}/revisions/new`)
+              }
             />
           ) : phase === 'analyzing' ? (
             <AnalysisWaiting
