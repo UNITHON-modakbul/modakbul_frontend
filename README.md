@@ -9,6 +9,7 @@ React + TypeScript + Vite 기반의 B2B 해커톤 프로젝트입니다.
 - Axios 공통 인스턴스 (`src/lib/api.ts`)
 - TanStack Query 전역 `QueryClient` (`src/lib/queryClient.ts`)
 - React Router 라우트 설정 (`src/routes/router.tsx`)
+- shadcn/ui 방식의 공통 UI 컴포넌트 (`src/components/ui`)
 
 ## Commands
 
