@@ -391,9 +391,19 @@ function DevelopmentReady({
   return (
     <section className="grid min-h-0 flex-1 place-items-center py-4">
       <div
-        className="grid w-full max-w-4xl gap-5 rounded-[30px] border border-[#17332f]/15 bg-white/90 p-6 shadow-[0_24px_70px_rgba(23,51,47,0.12)] sm:p-8 lg:grid-cols-[1.05fr_0.95fr]"
+        className={cn(
+          'grid w-full gap-5 rounded-[30px] border border-[#17332f]/15 bg-white/90 p-6 shadow-[0_24px_70px_rgba(23,51,47,0.12)] sm:p-8',
+          isRunning
+            ? 'h-[calc(100%-2rem)] max-w-7xl grid-cols-1 p-3 sm:p-4'
+            : 'max-w-4xl lg:grid-cols-[1.05fr_0.95fr]',
+        )}
       >
-        <div className="flex flex-col justify-center">
+        <div
+          className={cn(
+            'flex flex-col justify-center',
+            isRunning && 'hidden',
+          )}
+        >
           <span className="grid size-14 place-items-center rounded-2xl bg-[#17332f] text-white shadow-[4px_4px_0_#d9ef7d]">
             <Rocket aria-hidden="true" size={26} />
           </span>
@@ -422,7 +432,12 @@ function DevelopmentReady({
           </div>
         </div>
 
-        <div className="flex min-h-0 min-w-0 flex-col rounded-3xl bg-[#17332f] p-4 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] sm:p-5">
+        <div
+          className={cn(
+            'flex min-h-0 min-w-0 flex-col rounded-3xl bg-[#17332f] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]',
+            isRunning ? 'p-3 sm:p-4' : 'p-4 sm:p-5',
+          )}
+        >
           <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
               <span className={cn('size-2.5 rounded-full', isRunning ? 'bg-[#d9ef7d]' : 'bg-white/25')} />
@@ -433,26 +448,29 @@ function DevelopmentReady({
             <PackageCheck aria-hidden="true" className="text-[#d9ef7d]" size={18} />
           </div>
 
-          <div className="flex flex-1 flex-col justify-center py-5">
-            <p className="font-mono text-[10px] font-bold text-white/35">LOCAL URL</p>
-            <p className="mt-1 truncate font-mono text-sm font-bold text-[#d9ef7d]">
-              {localServiceUrl}
-            </p>
-            <p className="mt-4 font-mono text-[10px] font-bold text-white/35">
-              DEVELOPMENT SESSION
-            </p>
-            <p className="mt-1 truncate font-mono text-[10px] text-white/55">
-              {developmentSessionId}
-            </p>
-          </div>
-
           {isRunning ? (
-            <Button asChild className="w-full bg-[#d9ef7d] text-[#17332f] shadow-none hover:bg-[#e5f6a2] hover:shadow-none">
-              <a href={localServiceUrl} rel="noreferrer" target="_blank">
-                실행 화면 열기
-              </a>
-            </Button>
+            <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-[#f4f1e8]">
+              <iframe
+                className="min-h-0 w-full flex-1 border-0 bg-white"
+                src={localServiceUrl}
+                title="AI가 개발한 로컬 서비스 실행 화면"
+              />
+            </div>
           ) : (
+            <>
+              <div className="flex flex-1 flex-col justify-center py-5">
+                <p className="font-mono text-[10px] font-bold text-white/35">LOCAL URL</p>
+                <p className="mt-1 truncate font-mono text-sm font-bold text-[#d9ef7d]">
+                  {localServiceUrl}
+                </p>
+                <p className="mt-4 font-mono text-[10px] font-bold text-white/35">
+                  DEVELOPMENT SESSION
+                </p>
+                <p className="mt-1 truncate font-mono text-[10px] text-white/55">
+                  {developmentSessionId}
+                </p>
+              </div>
+
               <Button
                 className="w-full bg-[#ec6b42] shadow-none hover:bg-[#f27a55] hover:shadow-none"
                 disabled={isLaunching}
@@ -471,6 +489,7 @@ function DevelopmentReady({
                   </>
                 )}
               </Button>
+            </>
           )}
         </div>
       </div>
