@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   FileText,
   GitBranch,
+  LayoutDashboard,
   LoaderCircle,
   PackageCheck,
   Play,
@@ -14,13 +15,12 @@ import {
   Send,
   Sparkles,
   Terminal,
-  UsersRound,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useOutletContext } from 'react-router'
+import { Link } from 'react-router'
 import { Button } from '../../../components/ui/Button.tsx'
-import type { WorkspaceContext } from '../../../routes/workspaceContext.ts'
 import { cn } from '../../../utils/cn.ts'
+import { InteractiveServiceEditor } from '../components/InteractiveServiceEditor.tsx'
 import { QuestionCard } from '../components/QuestionCard.tsx'
 import {
   mockFollowUpQuestions,
@@ -449,12 +449,8 @@ function DevelopmentReady({
           </div>
 
           {isRunning ? (
-            <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-[#f4f1e8]">
-              <iframe
-                className="min-h-0 w-full flex-1 border-0 bg-white"
-                src={localServiceUrl}
-                title="AI가 개발한 로컬 서비스 실행 화면"
-              />
+            <div className="mt-4 min-h-0 flex-1 overflow-hidden rounded-2xl">
+              <InteractiveServiceEditor sessionId={developmentSessionId} />
             </div>
           ) : (
             <>
@@ -498,7 +494,6 @@ function DevelopmentReady({
 }
 
 export function RequirementsReviewPage() {
-  const { teamName } = useOutletContext<WorkspaceContext>()
   const [questionRounds, setQuestionRounds] = useState<RequirementQuestion[][]>([
     mockRequirementQuestions,
   ])
@@ -671,10 +666,13 @@ export function RequirementsReviewPage() {
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2 rounded-full border border-[#17332f]/12 bg-white/55 px-3 py-2 text-[11px] font-bold text-[#17332f]/65">
-            <UsersRound aria-hidden="true" size={14} />
-            <span className="max-w-20 truncate sm:max-w-40">{teamName}</span>
-          </div>
+          <Link
+            className="flex shrink-0 items-center gap-2 rounded-full border border-[#17332f]/12 bg-white/55 px-3 py-2 text-[11px] font-bold text-[#17332f]/65 transition hover:bg-white"
+            to="/"
+          >
+            <LayoutDashboard aria-hidden="true" size={14} />
+            <span className="hidden sm:inline">프로젝트</span>
+          </Link>
         </div>
       </header>
 
