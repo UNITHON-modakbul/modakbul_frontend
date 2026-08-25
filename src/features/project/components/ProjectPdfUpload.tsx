@@ -107,13 +107,21 @@ export function ProjectPdfUpload() {
             <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#ec6b42] text-white shadow-[3px_3px_0_#17332f]">
               <FileText aria-hidden="true" size={22} />
             </span>
-            <div className="min-w-0 flex-1">
+            <div className="group relative min-w-0 flex-1">
               <p
+                aria-describedby="selected-pdf-name-tooltip"
                 className="block max-w-full truncate text-sm font-extrabold text-[#17332f]"
-                title={file.name}
+                tabIndex={0}
               >
                 {file.name}
               </p>
+              <span
+                className="pointer-events-none invisible absolute inset-x-0 top-1/2 z-20 -translate-y-1/2 break-all rounded-xl bg-[#17332f] px-3 py-2 text-[11px] font-semibold leading-5 text-white opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                id="selected-pdf-name-tooltip"
+                role="tooltip"
+              >
+                {file.name}
+              </span>
               <p className="mt-1 font-mono text-xs text-[#17332f]/45">
                 PDF · {formatFileSize(file.size)}
               </p>
