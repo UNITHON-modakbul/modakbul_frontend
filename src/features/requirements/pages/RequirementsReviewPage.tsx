@@ -6,9 +6,14 @@ import {
   Check,
   CheckCircle2,
   FileText,
+  GitBranch,
   LoaderCircle,
+  PackageCheck,
+  Play,
+  Rocket,
   Send,
   Sparkles,
+  Terminal,
   UsersRound,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -30,6 +35,8 @@ type ReviewPhase =
   | 'round-complete'
   | 'analyzing'
   | 'finished'
+  | 'developing'
+  | 'development-ready'
 
 const initialAnalysisSteps = [
   '업로드한 PDF를 안전하게 전달받았어요.',
@@ -41,6 +48,17 @@ const followUpAnalysisSteps = [
   '작성한 답변을 AI에게 전달했어요.',
   '기획서와 답변을 함께 비교하고 있어요.',
   '추가로 확인할 질문이 있는지 검토하고 있어요.',
+]
+
+const developmentSessionId = '01a038ee-5f82-79e0-96a9-1ce584341e5e'
+const localServiceUrl = 'http://localhost:3000'
+
+const developmentSteps = [
+  '확정된 답변으로 ProjectSpec을 생성하고 있어요.',
+  '개발 세션과 서비스 저장소를 연결하고 있어요.',
+  'AI가 화면과 핵심 기능을 구현하고 있어요.',
+  '의존성을 설치하고 빌드 테스트를 실행하고 있어요.',
+  '로컬 실행 환경을 준비하고 있어요.',
 ]
 
 interface QuestionProgressRailProps {
@@ -264,6 +282,202 @@ function AnalysisWaiting({
   )
 }
 
+interface DevelopmentLoadingProps {
+  activeStep: number
+}
+
+function DevelopmentLoading({ activeStep }: DevelopmentLoadingProps) {
+  const progress = ((activeStep + 1) / developmentSteps.length) * 100
+
+  return (
+    <section className="grid min-h-0 flex-1 place-items-center py-4" aria-live="polite">
+      <div className="w-full max-w-3xl rounded-[30px] border border-[#17332f]/15 bg-white/90 p-6 shadow-[0_24px_70px_rgba(23,51,47,0.12)] sm:p-9">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <span className="relative grid size-16 shrink-0 place-items-center rounded-2xl bg-[#17332f] text-white shadow-[5px_5px_0_#d9ef7d]">
+              <Terminal aria-hidden="true" size={29} />
+              <span className="absolute -right-1 -top-1 size-4 animate-pulse rounded-full border-2 border-white bg-[#ec6b42]" />
+            </span>
+            <div>
+              <p className="font-mono text-[10px] font-black tracking-[0.14em] text-[#ec6b42]">
+                AI DEVELOPMENT IN PROGRESS
+              </p>
+              <h1 className="mt-1 text-2xl font-black tracking-[-0.045em] sm:text-3xl">
+                AI가 서비스를 개발하고 있어요.
+              </h1>
+            </div>
+          </div>
+          <span className="w-fit rounded-full bg-[#e9f2cc] px-3 py-1.5 font-mono text-[10px] font-black text-[#375226]">
+            BUILD {Math.round(progress)}%
+          </span>
+        </div>
+
+        <div className="mt-6">
+          <div className="h-2 overflow-hidden rounded-full bg-[#17332f]/10">
+            <div
+              className="h-full rounded-full bg-[#ec6b42] transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="mt-3 flex min-w-0 items-center gap-2 rounded-xl bg-[#17332f] px-3 py-2 font-mono text-[10px] text-white/60">
+            <GitBranch aria-hidden="true" className="shrink-0 text-[#d9ef7d]" size={13} />
+            <span className="shrink-0 text-white/85">개발 세션</span>
+            <span className="truncate">{developmentSessionId}</span>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          {developmentSteps.map((step, index) => {
+            const isDone = index < activeStep
+            const isActive = index === activeStep
+
+            return (
+              <div
+                className={cn(
+                  'flex min-h-14 items-center gap-3 rounded-2xl border px-3 py-2.5 text-xs font-bold transition',
+                  isDone
+                    ? 'border-[#b6cf5b] bg-[#e9f2cc] text-[#375226]'
+                    : isActive
+                      ? 'border-[#ec6b42]/35 bg-[#fff1ea] text-[#b94727]'
+                      : 'border-[#17332f]/8 bg-[#f3f0e7]/50 text-[#17332f]/32',
+                  index === developmentSteps.length - 1 &&
+                    'sm:col-span-2',
+                )}
+                key={step}
+              >
+                <span
+                  className={cn(
+                    'grid size-7 shrink-0 place-items-center rounded-full font-mono text-[10px] font-black',
+                    isDone
+                      ? 'bg-[#5f8a39] text-white'
+                      : isActive
+                        ? 'bg-[#ec6b42] text-white'
+                        : 'bg-[#17332f]/8',
+                  )}
+                >
+                  {isDone ? (
+                    <Check aria-hidden="true" size={15} strokeWidth={3} />
+                  ) : isActive ? (
+                    <LoaderCircle aria-hidden="true" className="animate-spin" size={15} />
+                  ) : (
+                    index + 1
+                  )}
+                </span>
+                {step}
+              </div>
+            )
+          })}
+        </div>
+
+        <p className="mt-5 text-center text-xs font-semibold text-[#17332f]/40">
+          빌드와 실행 검증이 끝나면 로컬 실행 화면으로 자동 전환됩니다.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+interface DevelopmentReadyProps {
+  isLaunching: boolean
+  isRunning: boolean
+  onLaunch: () => void
+}
+
+function DevelopmentReady({
+  isLaunching,
+  isRunning,
+  onLaunch,
+}: DevelopmentReadyProps) {
+  return (
+    <section className="grid min-h-0 flex-1 place-items-center py-4">
+      <div
+        className="grid w-full max-w-4xl gap-5 rounded-[30px] border border-[#17332f]/15 bg-white/90 p-6 shadow-[0_24px_70px_rgba(23,51,47,0.12)] sm:p-8 lg:grid-cols-[1.05fr_0.95fr]"
+      >
+        <div className="flex flex-col justify-center">
+          <span className="grid size-14 place-items-center rounded-2xl bg-[#17332f] text-white shadow-[4px_4px_0_#d9ef7d]">
+            <Rocket aria-hidden="true" size={26} />
+          </span>
+          <p className="mt-5 text-xs font-black tracking-[0.13em] text-[#5f8a39]">
+            LOCAL BUILD READY
+          </p>
+          <h1 className="mt-2 text-3xl font-black tracking-[-0.045em] sm:text-4xl">
+            로컬 실행 준비가 끝났어요.
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-[#17332f]/55">
+            AI가 개발과 빌드 검증을 완료했습니다. 준비된 서비스를 로컬에서
+            실행해 결과를 확인할 수 있어요.
+          </p>
+
+          <div className="mt-5 space-y-2">
+            {[
+              '소스 코드 생성 완료',
+              '패키지 설치 및 빌드 통과',
+              '로컬 실행 환경 준비 완료',
+            ].map((item) => (
+              <p className="flex items-center gap-2 text-xs font-bold text-[#375226]" key={item}>
+                <CheckCircle2 aria-hidden="true" size={15} />
+                {item}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex min-h-0 min-w-0 flex-col rounded-3xl bg-[#17332f] p-4 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] sm:p-5">
+          <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+            <div className="flex items-center gap-2">
+              <span className={cn('size-2.5 rounded-full', isRunning ? 'bg-[#d9ef7d]' : 'bg-white/25')} />
+              <span className="text-xs font-black">
+                {isRunning ? '서비스 실행 중' : '실행 대기 중'}
+              </span>
+            </div>
+            <PackageCheck aria-hidden="true" className="text-[#d9ef7d]" size={18} />
+          </div>
+
+          <div className="flex flex-1 flex-col justify-center py-5">
+            <p className="font-mono text-[10px] font-bold text-white/35">LOCAL URL</p>
+            <p className="mt-1 truncate font-mono text-sm font-bold text-[#d9ef7d]">
+              {localServiceUrl}
+            </p>
+            <p className="mt-4 font-mono text-[10px] font-bold text-white/35">
+              DEVELOPMENT SESSION
+            </p>
+            <p className="mt-1 truncate font-mono text-[10px] text-white/55">
+              {developmentSessionId}
+            </p>
+          </div>
+
+          {isRunning ? (
+            <Button asChild className="w-full bg-[#d9ef7d] text-[#17332f] shadow-none hover:bg-[#e5f6a2] hover:shadow-none">
+              <a href={localServiceUrl} rel="noreferrer" target="_blank">
+                실행 화면 열기
+              </a>
+            </Button>
+          ) : (
+              <Button
+                className="w-full bg-[#ec6b42] shadow-none hover:bg-[#f27a55] hover:shadow-none"
+                disabled={isLaunching}
+                onClick={onLaunch}
+                type="button"
+              >
+                {isLaunching ? (
+                  <>
+                    <LoaderCircle aria-hidden="true" className="animate-spin" size={17} />
+                    로컬 서비스 실행 중
+                  </>
+                ) : (
+                  <>
+                    <Play aria-hidden="true" size={17} fill="currentColor" />
+                    로컬 서비스 실행
+                  </>
+                )}
+              </Button>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function RequirementsReviewPage() {
   const { teamName } = useOutletContext<WorkspaceContext>()
   const [questionRounds, setQuestionRounds] = useState<RequirementQuestion[][]>([
@@ -273,6 +487,9 @@ export function RequirementsReviewPage() {
   const [answers, setAnswers] = useState<Record<string, RequirementAnswer>>({})
   const [phase, setPhase] = useState<ReviewPhase>('initial-analyzing')
   const [analysisStep, setAnalysisStep] = useState(0)
+  const [developmentStep, setDevelopmentStep] = useState(0)
+  const [isLaunching, setIsLaunching] = useState(false)
+  const [isLocalRunning, setIsLocalRunning] = useState(false)
 
   const activeRoundIndex = questionRounds.length - 1
   const roundNumber = activeRoundIndex + 1
@@ -294,6 +511,8 @@ export function RequirementsReviewPage() {
   const isFirstQuestion = activeQuestionIndex === 0
   const isLastQuestion = activeQuestionIndex === activeQuestions.length - 1
   const isRoundComplete = phase !== 'answering'
+  const isDevelopmentPhase =
+    phase === 'developing' || phase === 'development-ready'
 
   useEffect(() => {
     const isInitialAnalysis = phase === 'initial-analyzing'
@@ -330,6 +549,37 @@ export function RequirementsReviewPage() {
     }
   }, [activeRoundIndex, phase])
 
+  useEffect(() => {
+    if (phase !== 'developing') return
+
+    const stepTimer = window.setInterval(() => {
+      setDevelopmentStep((current) =>
+        Math.min(current + 1, developmentSteps.length - 1),
+      )
+    }, 1000)
+
+    const readyTimer = window.setTimeout(() => {
+      window.clearInterval(stepTimer)
+      setPhase('development-ready')
+    }, 5600)
+
+    return () => {
+      window.clearInterval(stepTimer)
+      window.clearTimeout(readyTimer)
+    }
+  }, [phase])
+
+  useEffect(() => {
+    if (!isLaunching) return
+
+    const launchTimer = window.setTimeout(() => {
+      setIsLaunching(false)
+      setIsLocalRunning(true)
+    }, 1400)
+
+    return () => window.clearTimeout(launchTimer)
+  }, [isLaunching])
+
   const handleNextQuestion = () => {
     if (!isCurrentAnswered) return
 
@@ -358,6 +608,13 @@ export function RequirementsReviewPage() {
     setPhase('answering')
   }
 
+  const handleStartDevelopment = () => {
+    setDevelopmentStep(0)
+    setIsLaunching(false)
+    setIsLocalRunning(false)
+    setPhase('developing')
+  }
+
   return (
     <div className="demo-grid relative h-dvh overflow-hidden bg-[#f3f0e7] text-[#17332f]">
       <div className="pointer-events-none absolute -left-28 top-1/3 h-72 w-72 rounded-full bg-[#d9ef7d]/35 blur-3xl" />
@@ -378,14 +635,20 @@ export function RequirementsReviewPage() {
             <p className="font-mono text-[10px] font-black tracking-[0.14em] text-[#ec6b42]">
               {phase === 'initial-analyzing'
                 ? 'AI REQUIREMENTS ANALYSIS'
-                : `AI REQUIREMENTS REVIEW · ROUND ${roundNumber}`}
+                : isDevelopmentPhase
+                  ? 'AI DEVELOPMENT PIPELINE'
+                  : `AI REQUIREMENTS REVIEW · ROUND ${roundNumber}`}
             </p>
             <p className="truncate text-xs font-extrabold text-[#17332f]/60 sm:text-sm">
               {phase === 'initial-analyzing'
                 ? '기획서 분석 및 질문 생성'
-                : roundNumber === 1
-                  ? '기획서 보완 질문'
-                  : '이전 답변 기반 후속 질문'}
+                : phase === 'developing'
+                  ? 'ProjectSpec 기반 서비스 개발'
+                  : phase === 'development-ready'
+                    ? '로컬 실행 준비 완료'
+                    : roundNumber === 1
+                      ? '기획서 보완 질문'
+                      : '이전 답변 기반 후속 질문'}
             </p>
           </div>
 
@@ -397,7 +660,7 @@ export function RequirementsReviewPage() {
       </header>
 
       <main className="relative z-10 mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-7xl px-2 pb-3 sm:h-[calc(100dvh-72px)] sm:px-6 sm:pb-5 lg:px-10">
-        {phase !== 'initial-analyzing' && (
+        {phase !== 'initial-analyzing' && !isDevelopmentPhase && (
           <QuestionProgressRail
             activeIndex={activeQuestionIndex}
             answers={answers}
@@ -412,7 +675,9 @@ export function RequirementsReviewPage() {
         <div
           className={cn(
             'flex min-w-0 flex-1 flex-col',
-            phase === 'initial-analyzing' ? 'px-2 sm:px-7' : 'pl-3 sm:pl-7',
+            phase === 'initial-analyzing' || isDevelopmentPhase
+              ? 'px-2 sm:px-7'
+              : 'pl-3 sm:pl-7',
           )}
         >
           {phase === 'initial-analyzing' ? (
@@ -420,6 +685,14 @@ export function RequirementsReviewPage() {
               activeStep={analysisStep}
               mode="initial"
               roundNumber={roundNumber}
+            />
+          ) : phase === 'developing' ? (
+            <DevelopmentLoading activeStep={developmentStep} />
+          ) : phase === 'development-ready' ? (
+            <DevelopmentReady
+              isLaunching={isLaunching}
+              isRunning={isLocalRunning}
+              onLaunch={() => setIsLaunching(true)}
             />
           ) : phase === 'analyzing' ? (
             <AnalysisWaiting
@@ -499,11 +772,13 @@ export function RequirementsReviewPage() {
                     <ArrowLeft aria-hidden="true" size={17} />
                     답변 검토
                   </Button>
-                  <Button asChild className="flex-1">
-                    <Link to="/">
-                      ProjectSpec 준비
-                      <ArrowRight aria-hidden="true" size={17} />
-                    </Link>
+                  <Button
+                    className="flex-1"
+                    onClick={handleStartDevelopment}
+                    type="button"
+                  >
+                    ProjectSpec 생성 및 개발 시작
+                    <ArrowRight aria-hidden="true" size={17} />
                   </Button>
                 </div>
               </div>
