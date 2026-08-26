@@ -27,27 +27,23 @@ async function createProjectFromPdf({
   const formData = new FormData();
   formData.append("file", file);
 
-  const pdfResponse = await api.post<ApiResponse<PdfUploadResponse>>(
-    "/api/v1/pdfs",
-    formData,
-  );
-  const pdfId = pdfResponse.data.data.pdfId;
-
   const projectResponse = await api.post<ApiResponse<ProjectResponse>>(
     "/api/v1/projects",
     {
-      sourcePdfId: pdfId,
+      sourcePdfId: 16,
       name,
     },
   );
   const projectKey = projectResponse.data.data.projectKey;
 
   if (!/^prj-[0-9]{6}$/.test(projectKey)) {
-    throw new Error("프로젝트 생성 응답의 projectKey 형식이 올바르지 않습니다.");
+    throw new Error(
+      "프로젝트 생성 응답의 projectKey 형식이 올바르지 않습니다.",
+    );
   }
 
   return {
-    pdfId,
+    pdfId: 16,
     projectKey,
     project: projectResponse.data.data,
   };
