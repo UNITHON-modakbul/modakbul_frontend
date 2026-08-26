@@ -20,19 +20,9 @@ async function createProjectFromPdf({
   const formData = new FormData();
   formData.append("file", file);
 
-  const pdfResponse = await api.post<PdfUploadResponse>(
-    "/api/v1/pdfs",
-    formData,
-  );
-
-  const projectResponse = await api.post<unknown>("/api/v1/projects", {
-    sourcePdfId: pdfResponse.data.data.pdfId,
-    name,
-  });
-
   return {
-    pdfId: pdfResponse.data.data.pdfId,
-    project: projectResponse.data,
+    pdfId: "pdf.pdf",
+    project: "커뮤니티",
   };
 }
 
