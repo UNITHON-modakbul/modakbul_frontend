@@ -7,10 +7,6 @@ interface ApiResponse<T> {
   message: string;
 }
 
-interface PdfUploadResponse {
-  pdfId: number;
-}
-
 interface ProjectResponse {
   projectKey: string;
 }
