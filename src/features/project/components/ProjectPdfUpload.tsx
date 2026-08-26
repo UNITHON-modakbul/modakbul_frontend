@@ -5,79 +5,82 @@ import {
   LoaderCircle,
   UploadCloud,
   X,
-} from 'lucide-react'
-import { useRef, useState, type DragEvent } from 'react'
-import { useNavigate } from 'react-router'
-import { Button } from '../../../components/ui/Button.tsx'
-import { cn } from '../../../utils/cn.ts'
+} from "lucide-react";
+import { useRef, useState, type DragEvent } from "react";
+import { useNavigate } from "react-router";
+import { Button } from "../../../components/ui/Button.tsx";
+import { cn } from "../../../utils/cn.ts";
 import {
   getPdfAnalysisErrorMessage,
   useAnalyzePdf,
-} from '../hooks/useAnalyzePdf.ts'
+} from "../hooks/useAnalyzePdf.ts";
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 function formatFileSize(size: number) {
-  return `${(size / 1024 / 1024).toFixed(1)} MB`
+  return `${(size / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function getPdfError(file: File) {
   const isPdf =
-    file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
   if (!isPdf) {
-    return 'PDF 파일만 업로드할 수 있어요.'
+    return "PDF 파일만 업로드할 수 있어요.";
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    return '파일 크기는 최대 20MB까지 업로드할 수 있어요.'
+    return "파일 크기는 최대 20MB까지 업로드할 수 있어요.";
   }
 
-  return null
+  return null;
 }
 
 export function ProjectPdfUpload() {
-  const navigate = useNavigate()
-  const analyzePdf = useAnalyzePdf()
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [projectName, setProjectName] = useState('')
-  const [file, setFile] = useState<File | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
+  const navigate = useNavigate();
+  const analyzePdf = useAnalyzePdf();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [projectName, setProjectName] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const selectFile = (selectedFile?: File) => {
-    if (!selectedFile) return
+    if (!selectedFile) return;
 
-    analyzePdf.reset()
-    const validationError = getPdfError(selectedFile)
-    setError(validationError)
+    analyzePdf.reset();
+    const validationError = getPdfError(selectedFile);
+    setError(validationError);
 
     if (!validationError) {
-      setFile(selectedFile)
+      setFile(selectedFile);
     }
-  }
+  };
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    setIsDragging(false)
-    selectFile(event.dataTransfer.files[0])
-  }
+    event.preventDefault();
+    setIsDragging(false);
+    selectFile(event.dataTransfer.files[0]);
+  };
 
   const clearFile = () => {
-    analyzePdf.reset()
-    setFile(null)
-    setError(null)
-    if (inputRef.current) inputRef.current.value = ''
-  }
+    analyzePdf.reset();
+    setFile(null);
+    setError(null);
+    if (inputRef.current) inputRef.current.value = "";
+  };
 
   const handleAnalyze = () => {
-    const name = projectName.trim()
-    if (!file || !name) return
+    const name = projectName.trim();
+    if (!file || !name) return;
 
-    analyzePdf.mutate({ file, name }, {
-      onSuccess: () => navigate('/requirements/review'),
-    })
-  }
+    analyzePdf.mutate(
+      { file, name },
+      {
+        onSuccess: () => navigate("/requirements/review"),
+      },
+    );
+  };
 
   return (
     <section className="relative w-full min-w-0 max-w-full overflow-hidden rounded-[28px] border border-[#17332f]/15 bg-white/85 p-5 shadow-[0_28px_80px_rgba(23,51,47,0.14)] backdrop-blur sm:p-7">
@@ -113,8 +116,8 @@ export function ProjectPdfUpload() {
           id="project-name"
           maxLength={100}
           onChange={(event) => {
-            analyzePdf.reset()
-            setProjectName(event.target.value)
+            analyzePdf.reset();
+            setProjectName(event.target.value);
           }}
           placeholder="예) 동네 클래스 예약 서비스"
           type="text"
@@ -124,10 +127,10 @@ export function ProjectPdfUpload() {
 
       <div
         className={cn(
-          'w-full min-w-0 max-w-full rounded-2xl border-2 border-dashed p-3 transition',
+          "w-full min-w-0 max-w-full rounded-2xl border-2 border-dashed p-3 transition",
           isDragging
-            ? 'border-[#ec6b42] bg-[#fff3eb]'
-            : 'border-[#17332f]/15 bg-[#fffdf7]',
+            ? "border-[#ec6b42] bg-[#fff3eb]"
+            : "border-[#17332f]/15 bg-[#fffdf7]",
         )}
         onDragEnter={() => setIsDragging(true)}
         onDragLeave={() => setIsDragging(false)}
@@ -196,8 +199,8 @@ export function ProjectPdfUpload() {
 
       <p
         className={cn(
-          'mt-2 min-h-5 px-1 text-xs',
-          error ? 'font-semibold text-[#c94d2a]' : 'text-[#17332f]/42',
+          "mt-2 min-h-5 px-1 text-xs",
+          error ? "font-semibold text-[#c94d2a]" : "text-[#17332f]/42",
         )}
         role="status"
       >
@@ -205,8 +208,8 @@ export function ProjectPdfUpload() {
           (analyzePdf.isError
             ? getPdfAnalysisErrorMessage(analyzePdf.error)
             : analyzePdf.isPending
-              ? 'PDF 분석과 프로젝트 생성을 순서대로 진행하고 있어요.'
-              : '선택한 파일은 아직 서버로 전송되지 않습니다.')}
+              ? "PDF 분석과 프로젝트 생성을 순서대로 진행하고 있어요."
+              : "선택한 파일은 아직 서버로 전송되지 않습니다.")}
       </p>
 
       <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-[#b6cf5b] bg-[#e9f2cc] p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -229,8 +232,8 @@ export function ProjectPdfUpload() {
           variant="outline"
         >
           <a
-            download="DemoForge_기능명세서_예시.pdf"
-            href="/examples/demoforge-requirements-example.pdf"
+            download="mvpilot_기능명세서_예시.pdf"
+            href="/examples/board_crud_function_spec_v2.pdf"
           >
             <Download aria-hidden="true" size={16} />
             예시 PDF 받기
@@ -247,7 +250,11 @@ export function ProjectPdfUpload() {
       >
         {analyzePdf.isPending ? (
           <>
-            <LoaderCircle aria-hidden="true" className="animate-spin" size={19} />
+            <LoaderCircle
+              aria-hidden="true"
+              className="animate-spin"
+              size={19}
+            />
             PDF 분석 및 프로젝트 생성 중
           </>
         ) : (
@@ -258,5 +265,5 @@ export function ProjectPdfUpload() {
         )}
       </Button>
     </section>
-  )
+  );
 }

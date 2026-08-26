@@ -5,8 +5,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen.canvas import Canvas
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT_PDF = ROOT / "output/pdf/demoforge-requirements-example.pdf"
-PUBLIC_PDF = ROOT / "public/examples/demoforge-requirements-example.pdf"
+OUTPUT_PDF = ROOT / "output/pdf/mvpilot-requirements-example.pdf"
+PUBLIC_PDF = ROOT / "public/examples/mvpilot-requirements-example.pdf"
 
 
 def main():
@@ -14,8 +14,8 @@ def main():
     PUBLIC_PDF.parent.mkdir(parents=True, exist_ok=True)
 
     canvas = Canvas(str(OUTPUT_PDF), pagesize=A4)
-    canvas.setTitle("DemoForge 기능명세서 예시")
-    canvas.setAuthor("DemoForge")
+    canvas.setTitle("mvpilot 기능명세서 예시")
+    canvas.setAuthor("mvpilot")
     canvas.setSubject("기능명세서 양식 준비 전 빈 PDF")
     canvas.showPage()
     canvas.save()

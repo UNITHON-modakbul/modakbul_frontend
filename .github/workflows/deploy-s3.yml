@@ -75,7 +75,7 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: DemoForge-${{ github.run_id }}
+          role-session-name: mvpilot-${{ github.run_id }}
 
       - name: Upload build to S3
         shell: bash

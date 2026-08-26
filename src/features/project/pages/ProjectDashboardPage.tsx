@@ -1,7 +1,7 @@
-import { Braces, FolderKanban, Plus } from 'lucide-react'
-import { Link } from 'react-router'
-import { ProjectCard } from '../components/ProjectCard.tsx'
-import { mockProjects } from '../data/mockProjects.ts'
+import { Braces, FolderKanban, Plus } from "lucide-react";
+import { Link } from "react-router";
+import { ProjectCard } from "../components/ProjectCard.tsx";
+import { mockProjects } from "../data/mockProjects.ts";
 
 export function ProjectDashboardPage() {
   return (
@@ -11,11 +11,17 @@ export function ProjectDashboardPage() {
 
       <header className="relative z-20 border-b border-[#17332f]/10 bg-[#f3f0e7]/82 backdrop-blur">
         <div className="mx-auto flex h-[72px] w-full max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
-          <Link className="flex items-center gap-3" to="/" aria-label="DemoForge 프로젝트 홈">
+          <Link
+            className="flex items-center gap-3"
+            to="/"
+            aria-label="mvpilot 프로젝트 홈"
+          >
             <span className="grid size-10 place-items-center rounded-xl bg-[#17332f] text-[#fffaf1] shadow-[4px_4px_0_#ec6b42]">
               <Braces aria-hidden="true" size={21} strokeWidth={2.4} />
             </span>
-            <span className="text-lg font-black tracking-[-0.04em]">DemoForge</span>
+            <span className="text-lg font-black tracking-[-0.04em]">
+              mvpilot
+            </span>
           </Link>
 
           <div className="flex items-center gap-2 rounded-full border border-[#17332f]/12 bg-white/55 px-3 py-2 text-[11px] font-bold text-[#17332f]/65">
@@ -44,8 +50,8 @@ export function ProjectDashboardPage() {
             className="inline-flex h-12 w-fit items-center justify-center gap-2 rounded-xl bg-[#ec6b42] px-5 text-sm font-black text-white shadow-[0_7px_0_#b94727] transition hover:-translate-y-0.5 hover:bg-[#f27a55] hover:shadow-[0_9px_0_#b94727] active:translate-y-1 active:shadow-[0_3px_0_#b94727]"
             to="/projects/new"
           >
-            <Plus aria-hidden="true" size={17} strokeWidth={3} />
-            새 프로젝트 만들기
+            <Plus aria-hidden="true" size={17} strokeWidth={3} />새 프로젝트
+            만들기
           </Link>
         </div>
 
@@ -66,5 +72,5 @@ export function ProjectDashboardPage() {
         </section>
       </main>
     </div>
-  )
+  );
 }

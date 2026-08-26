@@ -29,7 +29,7 @@ npm run preview
 cp .env.example .env.local
 ```
 
-`VITE_API_BASE_URL`이 없으면 Axios는 `/api`를 기본 경로로 사용합니다.
+`VITE_API_BASE_URL`이 없으면 Axios는 `http://api.mvpilot.cloud`를 기본 주소로 사용합니다.
 
 ## Deployment
 

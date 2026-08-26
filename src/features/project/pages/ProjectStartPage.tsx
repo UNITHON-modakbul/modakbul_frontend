@@ -1,13 +1,19 @@
-import { Braces, Check, FolderKanban, ShieldCheck, Workflow } from 'lucide-react'
-import { Link } from 'react-router'
-import { ProjectPdfUpload } from '../components/ProjectPdfUpload.tsx'
+import {
+  Braces,
+  Check,
+  FolderKanban,
+  ShieldCheck,
+  Workflow,
+} from "lucide-react";
+import { Link } from "react-router";
+import { ProjectPdfUpload } from "../components/ProjectPdfUpload.tsx";
 
 const pipelineSteps = [
-  { label: 'Template', number: '01' },
-  { label: 'Generate', number: '02' },
-  { label: 'Verify', number: '03' },
-  { label: 'Deploy', number: '04' },
-]
+  { label: "Template", number: "01" },
+  { label: "Generate", number: "02" },
+  { label: "Verify", number: "03" },
+  { label: "Deploy", number: "04" },
+];
 
 export function ProjectStartPage() {
   return (
@@ -16,13 +22,15 @@ export function ProjectStartPage() {
       <div className="pointer-events-none absolute -right-24 bottom-4 h-80 w-80 rounded-full bg-[#ff9b75]/35 blur-3xl" />
 
       <header className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-6 sm:px-8 lg:px-10">
-        <Link className="flex items-center gap-3" to="/" aria-label="DemoForge 프로젝트 홈">
+        <Link
+          className="flex items-center gap-3"
+          to="/"
+          aria-label="mvpilot 프로젝트 홈"
+        >
           <span className="grid size-10 place-items-center rounded-xl bg-[#17332f] text-[#fffaf1] shadow-[4px_4px_0_#ec6b42]">
             <Braces aria-hidden="true" size={21} strokeWidth={2.4} />
           </span>
-          <span className="text-lg font-black tracking-[-0.04em]">
-            DemoForge
-          </span>
+          <span className="text-lg font-black tracking-[-0.04em]">mvpilot</span>
         </Link>
 
         <Link
@@ -52,8 +60,8 @@ export function ProjectStartPage() {
 
           <p className="mt-8 max-w-xl text-base leading-8 text-[#17332f]/65 sm:text-lg">
             검증된 Template 위에 필요한 도메인만 생성하고, 테스트와 배포까지
-            하나의 파이프라인으로 연결합니다. 기능명세 PDF 한 장이면 시작할
-            수 있어요.
+            하나의 파이프라인으로 연결합니다. 기능명세 PDF 한 장이면 시작할 수
+            있어요.
           </p>
 
           <div className="mt-9 flex flex-wrap gap-2.5">
@@ -97,9 +105,9 @@ export function ProjectStartPage() {
       </main>
 
       <footer className="relative z-10 mx-auto flex w-full max-w-7xl items-center justify-between border-t border-[#17332f]/10 px-5 py-5 text-[11px] font-semibold text-[#17332f]/45 sm:px-8 lg:px-10">
-        <span>© 2026 DemoForge</span>
+        <span>© 2026 mvpilot</span>
         <span>React · FastAPI · AWS</span>
       </footer>
     </div>
-  )
+  );
 }

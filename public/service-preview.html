@@ -1,109 +1,1051 @@
 <!doctype html>
 <html lang="ko">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DemoForge 서비스 미리보기</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mvpilot 게시판 CRUD 데모</title>
     <style>
-      * { box-sizing: border-box; }
+      :root {
+        --bg: #f6f7fb;
+        --surface: #ffffff;
+        --surface-2: #f0f2f8;
+        --text: #151722;
+        --muted: #687086;
+        --line: #e1e5ef;
+        --primary: #6c5ce7;
+        --primary-2: #8b7cf6;
+        --danger: #e74c3c;
+        --danger-bg: #fff1ef;
+        --success: #1f9d63;
+        --shadow: 0 18px 45px rgba(41, 48, 78, 0.1);
+        --radius: 22px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
       body {
         margin: 0;
-        min-width: 320px;
-        min-height: 100vh;
-        background: #fffaf1;
-        color: #17332f;
-        font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        min-height: 100%;
       }
-      header {
+      body {
+        font-family:
+          Inter,
+          Pretendard,
+          "Apple SD Gothic Neo",
+          "Noto Sans KR",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background:
+          radial-gradient(
+            circle at 10% 0%,
+            rgba(108, 92, 231, 0.13),
+            transparent 30%
+          ),
+          radial-gradient(
+            circle at 100% 10%,
+            rgba(0, 184, 148, 0.1),
+            transparent 24%
+          ),
+          var(--bg);
+        color: var(--text);
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+      button,
+      a {
+        -webkit-tap-highlight-color: transparent;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .app-shell {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 56px;
+      }
+
+      .topbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 76px;
-        padding: 0 7%;
-        border-bottom: 1px solid rgba(23, 51, 47, 0.12);
+        gap: 16px;
+        margin-bottom: 22px;
       }
-      .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; }
-      .mark {
-        display: grid;
-        width: 42px;
-        height: 42px;
-        place-items: center;
-        border-radius: 12px;
-        background: #17332f;
-        color: #d9ef7d;
-        font-weight: 900;
-      }
-      nav { display: flex; gap: 30px; color: rgba(23, 51, 47, 0.58); font-size: 13px; font-weight: 800; }
-      main {
-        display: grid;
-        min-height: calc(100vh - 76px);
-        grid-template-columns: 1.05fr 0.95fr;
+
+      .brand {
+        display: flex;
         align-items: center;
-        gap: 5%;
-        padding: 7%;
+        gap: 12px;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+      }
+
+      .brand-mark {
+        width: 40px;
+        height: 40px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary), #00b894);
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.28);
+        font-size: 18px;
+      }
+
+      .brand-sub {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      .status-badge {
+        padding: 8px 11px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.75);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        backdrop-filter: blur(12px);
+      }
+
+      .panel {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(225, 229, 239, 0.9);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
         overflow: hidden;
       }
-      .eyebrow { color: #ec6b42; font-size: 12px; font-weight: 900; letter-spacing: 0.14em; }
-      h1 { margin: 14px 0 18px; font-size: clamp(42px, 6vw, 82px); line-height: 0.98; letter-spacing: -0.065em; }
-      h1 span { color: #ec6b42; }
-      p { max-width: 590px; margin: 0; color: rgba(23, 51, 47, 0.58); font-size: clamp(14px, 1.5vw, 18px); line-height: 1.75; }
-      button {
-        margin-top: 30px;
+
+      .panel-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 28px 30px 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        letter-spacing: -0.045em;
+        line-height: 1.1;
+      }
+      h2 {
+        font-size: 24px;
+        letter-spacing: -0.03em;
+        line-height: 1.3;
+      }
+
+      .eyebrow {
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        margin-bottom: 8px;
+      }
+
+      .description {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.65;
+      }
+
+      .btn {
         border: 0;
         border-radius: 14px;
-        background: #17332f;
-        color: white;
-        padding: 17px 25px;
-        font-size: 15px;
+        padding: 11px 15px;
+        min-height: 44px;
+        font-weight: 850;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition:
+          transform 0.16s ease,
+          box-shadow 0.16s ease,
+          opacity 0.16s ease,
+          background 0.16s ease;
+      }
+
+      .btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+      }
+      .btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+        transform: none;
+      }
+      .btn-primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary), var(--primary-2));
+        box-shadow: 0 10px 22px rgba(108, 92, 231, 0.22);
+      }
+      .btn-secondary {
+        color: var(--text);
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+      }
+      .btn-danger {
+        color: #fff;
+        background: var(--danger);
+        box-shadow: 0 10px 22px rgba(231, 76, 60, 0.18);
+      }
+      .btn-ghost {
+        color: var(--muted);
+        background: transparent;
+        border: 1px solid var(--line);
+      }
+
+      .board-list {
+        padding: 10px 18px 20px;
+      }
+      .post-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        padding: 18px 12px;
+        border-bottom: 1px solid var(--line);
+        border-radius: 14px;
+        cursor: pointer;
+        transition:
+          background 0.16s ease,
+          transform 0.16s ease;
+      }
+      .post-row:hover {
+        background: #f8f8fd;
+        transform: translateX(2px);
+      }
+      .post-row:last-child {
+        border-bottom: 0;
+      }
+      .post-title {
+        font-size: 16px;
         font-weight: 900;
-        box-shadow: 0 7px 0 #0d2421;
+        letter-spacing: -0.025em;
+        margin-bottom: 8px;
       }
-      .visual { position: relative; min-height: 390px; }
-      .blob { position: absolute; inset: 2% -12% -8% 2%; border-radius: 47% 53% 42% 58%; background: #d9ef7d; }
-      .card {
-        position: absolute;
-        inset: 13% 3% 8% 1%;
-        transform: rotate(2deg);
-        border: 4px solid #17332f;
-        border-radius: 34px;
-        background: white;
-        padding: 10%;
-        box-shadow: 18px 18px 0 #ec6b42;
+      .post-meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 650;
       }
-      .pill { display: inline-block; border-radius: 999px; background: #e9f2cc; padding: 8px 14px; font-size: 11px; font-weight: 900; }
-      .line { height: 10px; margin-top: 28px; border-radius: 999px; background: #17332f; }
-      .line.short { width: 72%; margin-top: 12px; background: rgba(23, 51, 47, 0.18); }
-      .blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 34px; }
-      .block { height: 100px; border-radius: 17px; background: #f3f0e7; }
-      .block:last-child { background: #17332f; }
+      .row-arrow {
+        align-self: center;
+        color: var(--muted);
+        font-weight: 900;
+      }
+
+      .empty {
+        padding: 70px 28px;
+        text-align: center;
+      }
+      .empty-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 18px;
+        background: #eeebff;
+        color: var(--primary);
+        font-size: 26px;
+      }
+      .empty p {
+        color: var(--muted);
+        margin-top: 8px;
+        line-height: 1.6;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 18px 0 6px;
+      }
+      .page-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .page-btn.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+      }
+
+      .content-wrap {
+        padding: 30px;
+      }
+      .detail-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        margin: 12px 0 24px;
+      }
+      .detail-body {
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.85;
+        font-size: 16px;
+        min-height: 180px;
+        padding: 24px 0;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 22px;
+      }
+      .actions .spacer {
+        flex: 1;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 22px;
+      }
+      .field {
+        display: grid;
+        gap: 9px;
+      }
+      .label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      label {
+        font-size: 13px;
+        font-weight: 900;
+      }
+      .counter {
+        font-size: 12px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #fbfcff;
+        color: var(--text);
+        border-radius: 14px;
+        padding: 13px 14px;
+        outline: none;
+        transition:
+          border 0.16s ease,
+          box-shadow 0.16s ease,
+          background 0.16s ease;
+      }
+      textarea {
+        min-height: 320px;
+        resize: vertical;
+        line-height: 1.7;
+      }
+      input:focus,
+      textarea:focus {
+        border-color: var(--primary);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+      }
+      .error-text {
+        color: var(--danger);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .not-found {
+        text-align: center;
+        padding: 76px 28px;
+      }
+      .not-found-code {
+        font-size: 58px;
+        font-weight: 950;
+        color: var(--primary);
+        letter-spacing: -0.06em;
+      }
+      .not-found p {
+        color: var(--muted);
+        margin: 10px 0 22px;
+      }
+
+      .toast-root {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 1000;
+        display: grid;
+        gap: 10px;
+        width: min(360px, calc(100vw - 40px));
+      }
+      .toast {
+        background: #151722;
+        color: white;
+        padding: 14px 16px;
+        border-radius: 14px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+        font-weight: 750;
+        font-size: 13px;
+        animation: toast-in 0.18s ease-out;
+      }
+      .toast.success {
+        background: #16794e;
+      }
+      .toast.error {
+        background: #a83228;
+      }
+      @keyframes toast-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .loading-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 900;
+        background: rgba(246, 247, 251, 0.5);
+        backdrop-filter: blur(3px);
+        display: grid;
+        place-items: center;
+      }
+      .loading-card {
+        background: #fff;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        border-radius: 18px;
+        padding: 18px 22px;
+        font-weight: 850;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid #ddd9ff;
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .spec-note {
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.7;
+        text-align: center;
+      }
+
       @media (max-width: 720px) {
-        nav { display: none; }
-        main { grid-template-columns: 1fr; padding-top: 12%; }
-        .visual { display: none; }
+        .app-shell {
+          width: min(100% - 20px, 1120px);
+          padding-top: 16px;
+        }
+        .topbar {
+          align-items: flex-start;
+        }
+        .status-badge {
+          display: none;
+        }
+        .panel-header {
+          padding: 22px 20px 18px;
+          flex-direction: column;
+        }
+        .panel-header .btn {
+          width: 100%;
+        }
+        .content-wrap {
+          padding: 22px 20px;
+        }
+        .post-row {
+          grid-template-columns: 1fr;
+        }
+        .row-arrow {
+          display: none;
+        }
+        .actions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+        .actions .spacer {
+          display: none;
+        }
+        .actions .btn-primary,
+        .actions .btn-danger {
+          width: 100%;
+        }
       }
     </style>
   </head>
   <body>
-    <header>
-      <div class="brand"><span class="mark">D</span>DemoForge</div>
-      <nav><span>서비스 소개</span><span>만드는 과정</span><span>FAQ</span></nav>
-    </header>
-    <main>
-      <section>
-        <div class="eyebrow">FROM IDEA TO LIVE PRODUCT</div>
-        <h1>아이디어를<br /><span>작동하는 데모로</span></h1>
-        <p>기획서를 올리면 AI가 필요한 질문을 찾고, 답변을 바탕으로 실제 동작하는 서비스를 완성해요.</p>
-        <button type="button">데모 만들기 →</button>
-      </section>
-      <section class="visual" aria-hidden="true">
-        <div class="blob"></div>
-        <div class="card">
-          <span class="pill">AI BUILD</span>
-          <div class="line"></div>
-          <div class="line short"></div>
-          <div class="blocks"><div class="block"></div><div class="block"></div></div>
-        </div>
-      </section>
-    </main>
+    <div id="app"></div>
+    <div class="toast-root" id="toastRoot"></div>
+
+    <script>
+      (() => {
+        const STORAGE_KEY = "demoforge-board-posts-v1";
+        const TITLE_MAX = 100;
+        const CONTENT_MAX = 10000;
+        const PAGE_SIZE = 10;
+        const FIXED_AUTHOR = "데모 사용자";
+
+        const seedPosts = [
+          {
+            id: "demo-3",
+            title: "게시판 CRUD 데모에 오신 것을 환영합니다.",
+            content:
+              "이 HTML은 게시판 목록, 상세, 작성, 수정, 삭제의 전체 흐름을 한 파일에서 확인할 수 있도록 구성되어 있습니다.\\n\\n브라우저의 localStorage를 사용하므로 작성하거나 수정한 데이터가 새로고침 후에도 유지됩니다.",
+            author: FIXED_AUTHOR,
+            createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
+            updatedAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
+          },
+          {
+            id: "demo-2",
+            title: "게시글 수정 기능 테스트",
+            content:
+              "상세 페이지에서 수정 버튼을 눌러 제목과 내용을 변경할 수 있습니다. 수정 페이지에는 기존 내용이 미리 채워집니다.",
+            author: FIXED_AUTHOR,
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+            updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
+          },
+          {
+            id: "demo-1",
+            title: "삭제 기능과 예외 처리 확인",
+            content:
+              "삭제 버튼을 누르면 확인 창이 먼저 표시되고, 확인 시 게시글이 완전히 삭제됩니다. 삭제된 URL에 다시 접근하면 404 화면이 표시됩니다.",
+            author: FIXED_AUTHOR,
+            createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+            updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+          },
+        ];
+
+        let state = {
+          posts: loadPosts(),
+          currentPage: 1,
+          busy: false,
+          dirty: false,
+          formSnapshot: null,
+        };
+
+        function loadPosts() {
+          try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            return Array.isArray(saved) ? saved : seedPosts;
+          } catch {
+            return seedPosts;
+          }
+        }
+
+        function persist() {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.posts));
+        }
+
+        function formatDate(iso) {
+          return new Intl.DateTimeFormat("ko-KR", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          }).format(new Date(iso));
+        }
+
+        function escapeHtml(value) {
+          return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+        }
+
+        function toast(message, type = "success") {
+          const root = document.getElementById("toastRoot");
+          const el = document.createElement("div");
+          el.className = `toast ${type}`;
+          el.textContent = message;
+          root.appendChild(el);
+          setTimeout(() => el.remove(), 2400);
+        }
+
+        function setBusy(isBusy, label = "처리 중입니다...") {
+          state.busy = isBusy;
+          const existing = document.getElementById("loadingOverlay");
+          if (existing) existing.remove();
+
+          if (isBusy) {
+            const overlay = document.createElement("div");
+            overlay.id = "loadingOverlay";
+            overlay.className = "loading-overlay";
+            overlay.innerHTML = `<div class="loading-card"><span class="spinner"></span>${escapeHtml(label)}</div>`;
+            document.body.appendChild(overlay);
+          }
+        }
+
+        function withDelay(fn, label) {
+          if (state.busy) return;
+          setBusy(true, label);
+          setTimeout(() => {
+            try {
+              fn();
+            } catch (error) {
+              console.error(error);
+              toast("요청 처리 중 오류가 발생했습니다.", "error");
+            } finally {
+              setBusy(false);
+            }
+          }, 450);
+        }
+
+        function navigate(hash, { force = false } = {}) {
+          if (!force && state.dirty) {
+            const ok = window.confirm(
+              "작성 중인 내용이 사라질 수 있습니다. 이동하시겠습니까?",
+            );
+            if (!ok) return;
+          }
+          state.dirty = false;
+          state.formSnapshot = null;
+          location.hash = hash;
+        }
+
+        function getRoute() {
+          const hash = location.hash || "#/board";
+          const raw = hash.replace(/^#/, "");
+          const parts = raw.split("/").filter(Boolean);
+
+          if (parts.length === 1 && parts[0] === "board")
+            return { name: "board" };
+          if (parts.length === 2 && parts[0] === "posts" && parts[1] === "new")
+            return { name: "new" };
+          if (parts.length === 2 && parts[0] === "posts")
+            return { name: "detail", id: decodeURIComponent(parts[1]) };
+          if (
+            parts.length === 3 &&
+            parts[0] === "posts" &&
+            parts[2] === "edit"
+          ) {
+            return { name: "edit", id: decodeURIComponent(parts[1]) };
+          }
+          return { name: "not-found" };
+        }
+
+        function appShell(content) {
+          return `
+          <div class="app-shell">
+            <header class="topbar">
+              <a href="#/board" class="brand" data-nav="#/board">
+                <span class="brand-mark">D</span>
+                <span>
+                  DemoForge Board
+                  <div class="brand-sub">CRUD FEATURE SPEC DEMO</div>
+                </span>
+              </a>
+              <span class="status-badge">Trendy · CRUD Only · LocalStorage</span>
+            </header>
+            ${content}
+            <p class="spec-note">
+              구현 범위: 게시글 CRUD / 최신순 목록 / 페이지당 10개 / 제목 100자 / 내용 10,000자 / 고정 데모 작성자 / Hard Delete / Toast 피드백
+            </p>
+          </div>
+        `;
+        }
+
+        function renderBoard() {
+          const sorted = [...state.posts].sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+          );
+          const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+          if (state.currentPage > totalPages) state.currentPage = totalPages;
+
+          const start = (state.currentPage - 1) * PAGE_SIZE;
+          const pagePosts = sorted.slice(start, start + PAGE_SIZE);
+
+          const rows = pagePosts.length
+            ? pagePosts
+                .map(
+                  (post) => `
+              <article class="post-row" data-open-post="${escapeHtml(post.id)}" tabindex="0" role="button">
+                <div>
+                  <div class="post-title">${escapeHtml(post.title)}</div>
+                  <div class="post-meta">
+                    <span>${escapeHtml(post.author)}</span>
+                    <span>작성 ${formatDate(post.createdAt)}</span>
+                    ${post.updatedAt !== post.createdAt ? `<span>수정 ${formatDate(post.updatedAt)}</span>` : ""}
+                  </div>
+                </div>
+                <span class="row-arrow">→</span>
+              </article>
+            `,
+                )
+                .join("")
+            : `
+            <div class="empty">
+              <div class="empty-icon">✦</div>
+              <h2>등록된 게시글이 없습니다.</h2>
+              <p>첫 게시글을 작성해 게시판을 시작해보세요.</p>
+            </div>
+          `;
+
+          const pages =
+            totalPages > 1
+              ? `
+            <div class="pagination" aria-label="게시글 페이지">
+              ${Array.from({ length: totalPages }, (_, i) => i + 1)
+                .map(
+                  (page) => `
+                <button class="page-btn ${page === state.currentPage ? "active" : ""}" data-page="${page}" type="button">${page}</button>
+              `,
+                )
+                .join("")}
+            </div>
+          `
+              : "";
+
+          return appShell(`
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="eyebrow">BOARD</div>
+                <h1>게시판</h1>
+                <p class="description">최신 작성순으로 게시글을 확인하고 새로운 글을 작성할 수 있습니다.</p>
+              </div>
+              <button class="btn btn-primary" id="newPostBtn" type="button">＋ 게시글 작성</button>
+            </div>
+            <div class="board-list">
+              ${rows}
+              ${pages}
+            </div>
+          </section>
+        `);
+        }
+
+        function renderDetail(id) {
+          const post = state.posts.find((item) => item.id === id);
+          if (!post)
+            return renderNotFound("존재하지 않거나 삭제된 게시글입니다.");
+
+          return appShell(`
+          <section class="panel">
+            <div class="content-wrap">
+              <div class="eyebrow">POST DETAIL</div>
+              <h1>${escapeHtml(post.title)}</h1>
+              <div class="detail-meta">
+                <span>${escapeHtml(post.author)}</span>
+                <span>작성 ${formatDate(post.createdAt)}</span>
+                <span>수정 ${formatDate(post.updatedAt)}</span>
+              </div>
+              <div class="detail-body">${escapeHtml(post.content)}</div>
+              <div class="actions">
+                <button class="btn btn-secondary" id="backToBoardBtn" type="button">← 게시판으로</button>
+                <span class="spacer"></span>
+                <button class="btn btn-primary" id="editPostBtn" type="button">수정</button>
+                <button class="btn btn-danger" id="deletePostBtn" type="button">삭제</button>
+              </div>
+            </div>
+          </section>
+        `);
+        }
+
+        function renderForm(mode, post = null) {
+          const isEdit = mode === "edit";
+          const title = post?.title ?? "";
+          const content = post?.content ?? "";
+
+          state.formSnapshot = { title, content };
+          state.dirty = false;
+
+          return appShell(`
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="eyebrow">${isEdit ? "EDIT POST" : "CREATE POST"}</div>
+                <h1>${isEdit ? "게시글 수정" : "게시글 작성"}</h1>
+                <p class="description">${isEdit ? "기존 내용을 수정한 뒤 저장할 수 있습니다." : "제목과 내용을 입력해 새 게시글을 작성합니다."}</p>
+              </div>
+            </div>
+            <div class="content-wrap">
+              <form class="form-grid" id="postForm" novalidate>
+                <div class="field">
+                  <div class="label-row">
+                    <label for="titleInput">제목 <span aria-hidden="true">*</span></label>
+                    <span class="counter" id="titleCounter">${title.length} / ${TITLE_MAX}</span>
+                  </div>
+                  <input id="titleInput" name="title" maxlength="${TITLE_MAX}" required value="${escapeHtml(title)}" placeholder="제목을 입력해주세요." />
+                  <div class="error-text" id="titleError"></div>
+                </div>
+
+                <div class="field">
+                  <div class="label-row">
+                    <label for="contentInput">내용 <span aria-hidden="true">*</span></label>
+                    <span class="counter" id="contentCounter">${content.length} / ${CONTENT_MAX}</span>
+                  </div>
+                  <textarea id="contentInput" name="content" maxlength="${CONTENT_MAX}" required placeholder="내용을 입력해주세요.">${escapeHtml(content)}</textarea>
+                  <div class="error-text" id="contentError"></div>
+                </div>
+
+                <div class="actions">
+                  <button class="btn btn-secondary" id="cancelBtn" type="button">취소</button>
+                  <span class="spacer"></span>
+                  <button class="btn btn-primary" id="submitBtn" type="submit">${isEdit ? "수정" : "작성 완료"}</button>
+                </div>
+              </form>
+            </div>
+          </section>
+        `);
+        }
+
+        function renderNotFound(message = "요청한 페이지를 찾을 수 없습니다.") {
+          return appShell(`
+          <section class="panel">
+            <div class="not-found">
+              <div class="not-found-code">404</div>
+              <h2>페이지를 찾을 수 없습니다.</h2>
+              <p>${escapeHtml(message)}</p>
+              <button class="btn btn-primary" id="notFoundBoardBtn" type="button">게시판으로 이동</button>
+            </div>
+          </section>
+        `);
+        }
+
+        function render() {
+          const route = getRoute();
+          let content;
+
+          if (route.name === "board") content = renderBoard();
+          else if (route.name === "detail") content = renderDetail(route.id);
+          else if (route.name === "new") content = renderForm("new");
+          else if (route.name === "edit") {
+            const post = state.posts.find((item) => item.id === route.id);
+            content = post
+              ? renderForm("edit", post)
+              : renderNotFound("수정할 게시글을 찾을 수 없습니다.");
+          } else content = renderNotFound();
+
+          document.getElementById("app").innerHTML = content;
+          bindEvents(route);
+        }
+
+        function bindEvents(route) {
+          document.querySelectorAll("[data-nav]").forEach((el) => {
+            el.addEventListener("click", (e) => {
+              e.preventDefault();
+              navigate(el.dataset.nav);
+            });
+          });
+
+          document
+            .getElementById("newPostBtn")
+            ?.addEventListener("click", () => navigate("#/posts/new"));
+          document
+            .getElementById("backToBoardBtn")
+            ?.addEventListener("click", () => navigate("#/board"));
+          document
+            .getElementById("notFoundBoardBtn")
+            ?.addEventListener("click", () =>
+              navigate("#/board", { force: true }),
+            );
+
+          document.querySelectorAll("[data-open-post]").forEach((el) => {
+            const open = () =>
+              navigate(`#/posts/${encodeURIComponent(el.dataset.openPost)}`);
+            el.addEventListener("click", open);
+            el.addEventListener("keydown", (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                open();
+              }
+            });
+          });
+
+          document.querySelectorAll("[data-page]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              state.currentPage = Number(btn.dataset.page);
+              render();
+            });
+          });
+
+          if (route.name === "detail") {
+            document
+              .getElementById("editPostBtn")
+              ?.addEventListener("click", () => {
+                navigate(`#/posts/${encodeURIComponent(route.id)}/edit`);
+              });
+
+            document
+              .getElementById("deletePostBtn")
+              ?.addEventListener("click", () => {
+                const ok = window.confirm(
+                  "게시글을 삭제하시겠습니까? 삭제한 게시글은 복구할 수 없습니다.",
+                );
+                if (!ok) return;
+
+                withDelay(() => {
+                  state.posts = state.posts.filter(
+                    (item) => item.id !== route.id,
+                  );
+                  persist();
+                  toast("게시글이 삭제되었습니다.");
+                  navigate("#/board", { force: true });
+                }, "게시글을 삭제하고 있습니다...");
+              });
+          }
+
+          if (route.name === "new" || route.name === "edit") {
+            const form = document.getElementById("postForm");
+            const titleInput = document.getElementById("titleInput");
+            const contentInput = document.getElementById("contentInput");
+            const titleCounter = document.getElementById("titleCounter");
+            const contentCounter = document.getElementById("contentCounter");
+
+            const updateDirty = () => {
+              titleCounter.textContent = `${titleInput.value.length} / ${TITLE_MAX}`;
+              contentCounter.textContent = `${contentInput.value.length} / ${CONTENT_MAX}`;
+              state.dirty =
+                titleInput.value !== (state.formSnapshot?.title ?? "") ||
+                contentInput.value !== (state.formSnapshot?.content ?? "");
+            };
+
+            titleInput.addEventListener("input", updateDirty);
+            contentInput.addEventListener("input", updateDirty);
+
+            document
+              .getElementById("cancelBtn")
+              ?.addEventListener("click", () => {
+                const destination =
+                  route.name === "edit"
+                    ? `#/posts/${encodeURIComponent(route.id)}`
+                    : "#/board";
+                navigate(destination);
+              });
+
+            form.addEventListener("submit", (event) => {
+              event.preventDefault();
+
+              const title = titleInput.value.trim();
+              const content = contentInput.value.trim();
+              const titleError = document.getElementById("titleError");
+              const contentError = document.getElementById("contentError");
+              titleError.textContent = "";
+              contentError.textContent = "";
+
+              let valid = true;
+              if (!title) {
+                titleError.textContent = "제목은 필수입니다.";
+                valid = false;
+              }
+              if (!content) {
+                contentError.textContent = "내용은 필수입니다.";
+                valid = false;
+              }
+              if (title.length > TITLE_MAX) {
+                titleError.textContent = `제목은 최대 ${TITLE_MAX}자까지 입력할 수 있습니다.`;
+                valid = false;
+              }
+              if (content.length > CONTENT_MAX) {
+                contentError.textContent = `내용은 최대 ${CONTENT_MAX.toLocaleString()}자까지 입력할 수 있습니다.`;
+                valid = false;
+              }
+              if (!valid) return;
+
+              if (route.name === "new") {
+                withDelay(() => {
+                  const now = new Date().toISOString();
+                  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+                  state.posts.push({
+                    id,
+                    title,
+                    content,
+                    author: FIXED_AUTHOR,
+                    createdAt: now,
+                    updatedAt: now,
+                  });
+                  persist();
+                  state.dirty = false;
+                  toast("게시글이 작성되었습니다.");
+                  navigate(`#/posts/${encodeURIComponent(id)}`, {
+                    force: true,
+                  });
+                }, "게시글을 작성하고 있습니다...");
+                return;
+              }
+
+              withDelay(() => {
+                const post = state.posts.find((item) => item.id === route.id);
+                if (!post) {
+                  toast("수정할 게시글을 찾을 수 없습니다.", "error");
+                  navigate("#/board", { force: true });
+                  return;
+                }
+                post.title = title;
+                post.content = content;
+                post.updatedAt = new Date().toISOString();
+                persist();
+                state.dirty = false;
+                toast("게시글이 수정되었습니다.");
+                navigate(`#/posts/${encodeURIComponent(route.id)}`, {
+                  force: true,
+                });
+              }, "게시글을 수정하고 있습니다...");
+            });
+          }
+        }
+
+        window.addEventListener("hashchange", render);
+        window.addEventListener("beforeunload", (event) => {
+          if (!state.dirty) return;
+          event.preventDefault();
+          event.returnValue = "";
+        });
+
+        if (!location.hash) location.hash = "#/board";
+        render();
+      })();
+    </script>
   </body>
 </html>
