@@ -1,12 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
-import { api } from "../../../lib/api.ts";
-
-interface PdfUploadResponse {
-  data: {
-    pdfId: string;
-  };
-}
 
 interface CreateProjectFromPdfRequest {
   file: File;
@@ -22,7 +15,7 @@ async function createProjectFromPdf({
 
   return {
     pdfId: "pdf.pdf",
-    project: "커뮤니티",
+    project: name,
   };
 }
 
