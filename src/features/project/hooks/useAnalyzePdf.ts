@@ -26,7 +26,7 @@ async function createProjectFromPdf({
   const projectResponse = await api.post<ApiResponse<ProjectResponse>>(
     "/api/v1/projects",
     {
-      sourcePdfId: 33,
+      sourcePdfId: 34,
       name,
     },
   );
