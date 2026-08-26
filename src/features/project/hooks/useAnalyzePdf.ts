@@ -2,6 +2,19 @@ import { useMutation } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { api } from "../../../lib/api.ts";
 
+interface ApiResponse<T> {
+  data: T;
+  message: string;
+}
+
+interface PdfUploadResponse {
+  pdfId: number;
+}
+
+interface ProjectResponse {
+  projectKey: string;
+}
+
 interface CreateProjectFromPdfRequest {
   file: File;
   name: string;
@@ -14,15 +27,29 @@ async function createProjectFromPdf({
   const formData = new FormData();
   formData.append("file", file);
 
-  const projectResponse = await api.post<unknown>("/api/v1/projects", {
-    sourcePdfId: 16,
-    name,
-  });
+  const pdfResponse = await api.post<ApiResponse<PdfUploadResponse>>(
+    "/api/v1/pdfs",
+    formData,
+  );
+  const pdfId = pdfResponse.data.data.pdfId;
 
-  console.log(projectResponse.data);
+  const projectResponse = await api.post<ApiResponse<ProjectResponse>>(
+    "/api/v1/projects",
+    {
+      sourcePdfId: pdfId,
+      name,
+    },
+  );
+  const projectKey = projectResponse.data.data.projectKey;
+
+  if (!/^prj-[0-9]{6}$/.test(projectKey)) {
+    throw new Error("프로젝트 생성 응답의 projectKey 형식이 올바르지 않습니다.");
+  }
+
   return {
-    pdfId: 16,
-    project: projectResponse.data,
+    pdfId,
+    projectKey,
+    project: projectResponse.data.data,
   };
 }
 
