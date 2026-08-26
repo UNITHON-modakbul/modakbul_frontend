@@ -77,7 +77,8 @@ export function ProjectPdfUpload() {
     analyzePdf.mutate(
       { file, name },
       {
-        onSuccess: () => navigate("/requirements/review"),
+        onSuccess: ({ projectKey }) =>
+          navigate(`/projects/${projectKey}/requirements/review`),
       },
     );
   };

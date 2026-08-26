@@ -158,11 +158,10 @@ export function ProjectPreviewPage() {
   const handleDeploy = async () => {
     try {
       await deployProject.mutateAsync({
-        previewUrl: servicePreviewUrl,
-        sessionId: developmentSessionId,
+        projectId,
       });
     } catch {
-      // 배포 API 명세가 확정되기 전까지 UI 상태만 확인합니다.
+      // React Query의 isError/error 상태로 화면에서 처리합니다.
     }
   };
 
