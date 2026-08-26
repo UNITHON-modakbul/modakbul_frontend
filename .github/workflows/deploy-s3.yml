@@ -48,7 +48,6 @@ jobs:
         run: |
           test -n "$AWS_REGION" || (echo "AWS_REGION environment variable is required" && exit 1)
           test -n "${{ secrets.AWS_ROLE_ARN }}" || (echo "AWS_ROLE_ARN environment variable is required" && exit 1)
-          test -n "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" || (echo "CLOUDFRONT_DISTRIBUTION_ID environment variable is required" && exit 1)
 
       - name: Debug OIDC subject
         shell: bash
@@ -96,12 +95,6 @@ jobs:
               --content-type "text/html; charset=utf-8" \
               --cache-control "no-store,no-cache,max-age=0,must-revalidate"
           fi
-
-      - name: Invalidate CloudFront cache
-        run: >-
-          aws cloudfront create-invalidation
-          --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
-          --paths "/*"
 
       - name: Write deployment summary
         shell: bash
