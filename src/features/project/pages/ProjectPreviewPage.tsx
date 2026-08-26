@@ -1,8 +1,12 @@
 import {
   ArrowRight,
   Braces,
+  Check,
+  CheckCircle2,
+  CircleDashed,
   CloudUpload,
   ExternalLink,
+  GitBranch,
   Home,
   LayoutDashboard,
   LoaderCircle,
@@ -15,50 +19,151 @@ import { useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { Button } from "../../../components/ui/Button.tsx";
 import { cn } from "../../../utils/cn.ts";
-import { useDeployProject } from "../../deployment/hooks/useDeployProject.ts";
+import {
+  useDeployProject,
+  type DeploymentResponse,
+  type DeploymentRun,
+} from "../../deployment/hooks/useDeployProject.ts";
 import { servicePreviewUrl } from "../utils/preview.ts";
 
 const developmentSessionId = "01a038ee-5f82-79e0-96a9-1ce584341e5e";
 
-function DeploymentLoading() {
+const deploymentSteps: Array<{
+  key: keyof Pick<
+    DeploymentResponse,
+    | "prepare"
+    | "backendCi"
+    | "frontendCi"
+    | "qa"
+    | "image"
+    | "route"
+    | "backendDeploy"
+    | "frontendDeploy"
+  >;
+  label: string;
+}> = [
+  { key: "prepare", label: "배포 환경 준비" },
+  { key: "backendCi", label: "백엔드 CI" },
+  { key: "frontendCi", label: "프론트엔드 CI" },
+  { key: "qa", label: "QA 검증" },
+  { key: "image", label: "이미지 빌드" },
+  { key: "route", label: "라우팅 연결" },
+  { key: "backendDeploy", label: "백엔드 배포" },
+  { key: "frontendDeploy", label: "프론트엔드 배포" },
+];
+
+const deploymentStatusLabels: Record<string, string> = {
+  PREPARING: "배포 환경을 준비하고 있어요.",
+  BACKEND_CI: "백엔드 빌드와 테스트를 진행하고 있어요.",
+  FRONTEND_CI: "프론트엔드 빌드와 테스트를 진행하고 있어요.",
+  QA_RUNNING: "서비스 품질을 검증하고 있어요.",
+  IMAGE_BUILDING: "실행 이미지를 만들고 있어요.",
+  ROUTING: "서비스 접속 경로를 연결하고 있어요.",
+  BACKEND_DEPLOYING: "백엔드를 배포하고 있어요.",
+  FRONTEND_DEPLOYING: "프론트엔드를 배포하고 있어요.",
+};
+
+function getDeploymentStatusLabel(status: string) {
+  return (
+    deploymentStatusLabels[status] ??
+    `${status.replaceAll("_", " ")} 단계를 진행하고 있어요.`
+  );
+}
+
+function DeploymentLoading({
+  deployment,
+}: {
+  deployment: DeploymentResponse | null;
+}) {
+  const runs = deployment
+    ? deploymentSteps.map((step) => deployment[step.key] as DeploymentRun)
+    : [];
+  const lastStartedIndex = runs.reduce(
+    (lastIndex, run, index) => (run.runId ? index : lastIndex),
+    -1,
+  );
+  const progress = deployment
+    ? Math.max(
+        6,
+        ((lastStartedIndex + 0.5) / deploymentSteps.length) * 100,
+      )
+    : 4;
+
   return (
     <section
       aria-live="polite"
-      className="grid min-h-0 w-full flex-1 place-items-center rounded-[30px] border border-[#17332f]/15 bg-white/90 p-6 shadow-[0_24px_70px_rgba(23,51,47,0.12)]"
+      className="min-h-0 w-full flex-1 overflow-y-auto rounded-[30px] border border-[#17332f]/15 bg-white/90 p-5 shadow-[0_24px_70px_rgba(23,51,47,0.12)] sm:p-7"
     >
-      <div className="w-full max-w-2xl text-center">
-        <div className="relative mx-auto grid size-20 place-items-center">
-          <span className="absolute inset-0 animate-spin rounded-full border-4 border-[#17332f]/8 border-t-[#ec6b42]" />
-          <span className="grid size-14 place-items-center rounded-2xl bg-[#17332f] text-white shadow-[4px_4px_0_#d9ef7d]">
-            <ServerCog aria-hidden="true" size={27} />
-          </span>
-        </div>
-        <p className="mt-7 text-xs font-black tracking-[0.14em] text-[#ec6b42]">
-          DEPLOYING SERVICE
-        </p>
-        <h1 className="mt-3 text-3xl font-black tracking-[-0.05em] sm:text-4xl">
-          서비스를 배포하고 있어요.
-        </h1>
-        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#17332f]/55">
-          실행 가능한 결과를 배포 환경에 준비하고 접속 주소를 연결하고 있습니다.
-        </p>
+      <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col justify-center">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="relative grid size-16 shrink-0 place-items-center">
+              <span className="absolute inset-0 animate-spin rounded-2xl border-4 border-[#17332f]/8 border-t-[#ec6b42]" />
+              <span className="grid size-11 place-items-center rounded-xl bg-[#17332f] text-white shadow-[3px_3px_0_#d9ef7d]">
+                <ServerCog aria-hidden="true" size={22} />
+              </span>
+            </div>
+            <div>
+              <p className="text-[10px] font-black tracking-[0.14em] text-[#ec6b42]">
+                {deployment?.status ?? "DEPLOYMENT REQUESTING"}
+              </p>
+              <h1 className="mt-1 text-2xl font-black tracking-[-0.05em] sm:text-3xl">
+                {deployment
+                  ? getDeploymentStatusLabel(deployment.status)
+                  : "배포 요청을 전달하고 있어요."}
+              </h1>
+              <p className="mt-2 text-xs leading-5 text-[#17332f]/50">
+                완료될 때까지 배포 상태를 자동으로 확인합니다.
+              </p>
+            </div>
+          </div>
 
-        <div className="mx-auto mt-8 grid max-w-xl gap-2 sm:grid-cols-3">
-          {["프로젝트 패키징", "배포 환경 준비", "접속 URL 연결"].map(
-            (step, index) => (
-              <div
-                className="flex min-h-20 items-center gap-3 rounded-2xl border border-[#17332f]/10 bg-[#f3f0e7]/65 px-4 text-left"
-                key={step}
-              >
+          {deployment && (
+            <div className="grid shrink-0 grid-cols-2 gap-2">
+              <div className="rounded-xl border border-[#17332f]/10 bg-[#f3f0e7]/70 px-3 py-2">
+                <p className="text-[9px] font-black text-[#17332f]/35">BACKEND</p>
+                <p className="mt-0.5 font-mono text-[11px] font-black text-[#375226]">
+                  {deployment.backendStatus}
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#17332f]/10 bg-[#f3f0e7]/70 px-3 py-2">
+                <p className="text-[9px] font-black text-[#17332f]/35">FRONTEND</p>
+                <p className="mt-0.5 font-mono text-[11px] font-black text-[#ec6b42]">
+                  {deployment.frontendStatus}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 h-2 overflow-hidden rounded-full bg-[#17332f]/8">
+          <div
+            className="h-full rounded-full bg-[#ec6b42] transition-[width] duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {deploymentSteps.map((step, index) => {
+            const run = deployment?.[step.key] as DeploymentRun | undefined;
+            const isActive = Boolean(run?.runId) && index === lastStartedIndex;
+            const isDone = Boolean(run?.runId) && index < lastStartedIndex;
+            const isSkipped = !run?.runId && index < lastStartedIndex;
+            const content = (
+              <>
                 <span
                   className={cn(
                     "grid size-7 shrink-0 place-items-center rounded-full font-mono text-[10px] font-black",
-                    index === 0
-                      ? "bg-[#ec6b42] text-white"
-                      : "bg-[#17332f]/8 text-[#17332f]/38",
+                    isDone
+                      ? "bg-[#5f8a39] text-white"
+                      : isActive
+                        ? "bg-[#ec6b42] text-white"
+                        : "bg-[#17332f]/8 text-[#17332f]/35",
                   )}
                 >
-                  {index === 0 ? (
+                  {isDone ? (
+                    <Check aria-hidden="true" size={14} strokeWidth={3} />
+                  ) : isActive ? (
                     <LoaderCircle
                       aria-hidden="true"
                       className="animate-spin"
@@ -68,15 +173,91 @@ function DeploymentLoading() {
                     index + 1
                   )}
                 </span>
-                <span className="text-xs font-bold text-[#17332f]/62">
-                  {step}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-xs font-bold text-[#17332f]/70">
+                    {step.label}
+                  </span>
+                  <span className="mt-0.5 block truncate font-mono text-[9px] text-[#17332f]/35">
+                    {isDone
+                      ? "완료"
+                      : isActive
+                        ? `RUN ${run?.runId}`
+                        : isSkipped
+                          ? "건너뜀"
+                          : "대기 중"}
+                  </span>
                 </span>
+                {run?.url && (
+                  <ExternalLink
+                    aria-hidden="true"
+                    className="shrink-0 text-[#17332f]/30"
+                    size={13}
+                  />
+                )}
+              </>
+            );
+
+            const className = cn(
+              "flex min-h-16 items-center gap-3 rounded-2xl border px-3 text-left transition",
+              isActive
+                ? "border-[#ec6b42]/35 bg-[#fff1ea]"
+                : isDone
+                  ? "border-[#b6cf5b] bg-[#e9f2cc]/70"
+                  : "border-[#17332f]/8 bg-[#f3f0e7]/55",
+            );
+
+            return run?.url ? (
+              <a
+                className={className}
+                href={run.url}
+                key={step.key}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {content}
+              </a>
+            ) : (
+              <div className={className} key={step.key}>
+                {content}
               </div>
-            ),
-          )}
+            );
+          })}
         </div>
-        <p className="mt-6 text-[11px] font-semibold text-[#17332f]/38">
-          화면을 닫지 않아도 완료되면 자동으로 알려드려요.
+
+        {deployment && (
+          <div className="mt-5 grid gap-2 sm:grid-cols-2">
+            <a
+              className="flex min-w-0 items-center gap-3 rounded-2xl border border-[#17332f]/10 bg-white px-4 py-3 transition hover:border-[#17332f]/25"
+              href={`https://github.com/${deployment.repository}`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <GitBranch aria-hidden="true" className="shrink-0 text-[#5f8a39]" size={17} />
+              <span className="min-w-0">
+                <span className="block text-[9px] font-black text-[#17332f]/35">REPOSITORY</span>
+                <span className="block truncate font-mono text-[11px] font-bold">{deployment.repository}</span>
+              </span>
+            </a>
+            <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-[#17332f]/10 bg-white px-4 py-3">
+              {deployment.backendUrl ? (
+                <CheckCircle2 aria-hidden="true" className="shrink-0 text-[#5f8a39]" size={17} />
+              ) : (
+                <CircleDashed aria-hidden="true" className="shrink-0 text-[#17332f]/30" size={17} />
+              )}
+              <span className="min-w-0">
+                <span className="block text-[9px] font-black text-[#17332f]/35">RUNTIME</span>
+                <span className="block truncate font-mono text-[11px] font-bold">
+                  {deployment.runtimeHostId ?? "호스트 배정 대기 중"}
+                </span>
+              </span>
+            </div>
+          </div>
+        )}
+
+        <p className="mt-4 text-center text-[10px] font-semibold text-[#17332f]/35">
+          {deployment
+            ? `배포 ID ${deployment.deploymentId} · 프로젝트 ${deployment.projectId}`
+            : "배포 정보를 기다리고 있어요."}
         </p>
       </div>
     </section>
@@ -218,7 +399,7 @@ export function ProjectPreviewPage() {
 
       <main className="relative z-10 mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-[1600px] px-3 pb-3 pt-3 sm:h-[calc(100dvh-72px)] sm:px-6 sm:pb-5 sm:pt-4 lg:px-10">
         {deployProject.isPending ? (
-          <DeploymentLoading />
+          <DeploymentLoading deployment={deployProject.currentDeployment} />
         ) : deployProject.isSuccess ? (
           <DeploymentComplete
             deploymentUrl={deployProject.data.deploymentUrl}

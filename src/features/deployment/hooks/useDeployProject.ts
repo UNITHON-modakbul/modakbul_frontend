@@ -1,20 +1,45 @@
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { api } from "../../../lib/api.ts";
 
 interface ApiResponse<T> {
+  success: boolean;
+  code: string;
   data: T;
   message: string;
+  errors: unknown;
+  timestamp: string;
 }
 
-interface DeploymentResponse {
+export interface DeploymentRun {
+  runId: number | null;
+  url: string | null;
+}
+
+export interface DeploymentResponse {
   deploymentId: string;
   projectId: string;
+  repository: string;
   status: string;
   backendStatus: string;
   frontendStatus: string;
+  prepare: DeploymentRun;
+  backendCi: DeploymentRun;
+  frontendCi: DeploymentRun;
+  qa: DeploymentRun;
+  image: DeploymentRun;
+  route: DeploymentRun;
+  backendDeploy: DeploymentRun;
+  frontendDeploy: DeploymentRun;
+  runtimeHostId: string | null;
   backendUrl: string | null;
+  healthUrl: string | null;
   frontendUrl: string | null;
+  commitSha: string | null;
   failureReason: string | null;
+  reused: boolean;
+  requestedAt: string;
+  updatedAt: string;
 }
 
 interface DeployProjectRequest {
@@ -29,7 +54,10 @@ function wait(milliseconds: number) {
   return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
-async function deployProject({ projectId }: DeployProjectRequest) {
+async function deployProject(
+  { projectId }: DeployProjectRequest,
+  onProgress: (deployment: DeploymentResponse) => void,
+) {
   if (!PROJECT_KEY_PATTERN.test(projectId)) {
     throw new Error("배포할 projectKey 형식이 올바르지 않습니다.");
   }
@@ -38,6 +66,7 @@ async function deployProject({ projectId }: DeployProjectRequest) {
     `/api/v1/deployments/projects/${encodeURIComponent(projectId)}`,
   );
   let deployment = startResponse.data.data;
+  onProgress(deployment);
   const deadline = Date.now() + DEPLOYMENT_TIMEOUT_MS;
 
   while (deployment.status !== "SUCCEEDED" && deployment.status !== "FAILED") {
@@ -50,6 +79,7 @@ async function deployProject({ projectId }: DeployProjectRequest) {
       `/api/v1/deployments/${encodeURIComponent(deployment.deploymentId)}`,
     );
     deployment = statusResponse.data.data;
+    onProgress(deployment);
   }
 
   if (deployment.status === "FAILED") {
@@ -69,7 +99,16 @@ async function deployProject({ projectId }: DeployProjectRequest) {
 }
 
 export function useDeployProject() {
-  return useMutation({
-    mutationFn: deployProject,
+  const [currentDeployment, setCurrentDeployment] =
+    useState<DeploymentResponse | null>(null);
+  const mutation = useMutation({
+    mutationFn: (request: DeployProjectRequest) =>
+      deployProject(request, setCurrentDeployment),
+    onMutate: () => setCurrentDeployment(null),
   });
+
+  return {
+    ...mutation,
+    currentDeployment,
+  };
 }
